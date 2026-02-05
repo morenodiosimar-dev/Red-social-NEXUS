@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Nexus</title>
+    <link rel="stylesheet" href="index.css">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Pantalla de  la lista de los chats -->
+
+    <div class="pantalla" id="modulo-lista-chats">
+        <div class="top-bar" id="caja-arriba">
+            <div class="titulo">Nexus</div>
+            <ion-icon name="search-outline" class="Lupa"></ion-icon>
+            <input type="text" class="busqueda" placeholder="Buscar..." id="Busca">
+        </div>
+<!-- Donde sale la lista-->
+        <div class="lista-chats" id="lista">
+            </div>
+    </div>
+
+    <!--Pantalla modulo del chat -->
+    <div class="pantalla" id="modulo-chat" style="display: none;">
+        <div class="messenger">
+            
+            <div class="msn-left">
+               
+                <div class="msn-header">
+                    <ion-icon name="exit-outline" class="salida" id="btnCerrarChat"></ion-icon>
+            
+                  <div class="info-usuario-header">
+                    <div class="texto-header">
+            <img id="fotoChatSeleccionado" src="" alt="">
+            <span id="nombreChatSeleccionado"></span>
+            <small id="estadoChat" style="display:block;font-size:12px;color:#9e9e9e;">
+             Desconectado
+             </small>
+        </div>    
+    </div>
+                </div>
+                
+<!--Cuerpo del chat -->
+            <div id="msnBody" style="flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px;">  </div>
+                <div id="Escribiendo" class="escribiendo"></div>
+
+                <div class="msn-input">
+                    <input type="text" id="msgInput" placeholder="Escribe un mensaje...">
+                    <ion-icon name="send-outline" class="enviar" id="btnEnviar"></ion-icon>
+                </div>
+            </div>
+
+<!-- Lista derecha del chat (lista derecha del chat sale solo en computadoras)-->            
+            <div class="msn-right">
+                <h2 class="title">Chats</h2>
+                <div id="lista-derecha" class="lista-contactos-mini"></div>
+                </div>
+        </div>
+    </div>
+
+    <!--Iconos inferiores salen en la pantalla principal lista chats-->
+<div class="iconos-inferiores">
+    <ion-icon name="home-outline" onclick="window.location.href='http://localhost/Proyecto%20Prueba/cuenta.php'" class="icon"></ion-icon>
+    
+    <ion-icon name="search-outline" onclick="window.location.href='http://localhost/Proyecto%20Prueba/busqueda.php'" class="icon"></ion-icon>
+    
+    <ion-icon name="chatbubble-outline" onclick="window.location.href='http://localhost:3000'" class="icon active-icon"></ion-icon>
+    
+    <ion-icon name="person-outline" onclick="window.location.href='http://localhost/Proyecto%20Prueba/perfil.php'"class="icon"></ion-icon>
+</div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="scritp.js"></script>
+</body>
+</html>

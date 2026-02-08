@@ -6,44 +6,43 @@ const http = require("http").createServer(app);
 const mysql = require("mysql2");
 const path = require("path");
 
+const PORT = process.env.PORT || 3000;
 // ===============================
 // CONFIGURACIÓN DE SOCKET.IO
 // ===============================
 const io = require("socket.io")(http, {
     cors: {
-       origin: "*", // Permite la conexión desde cualquier carpeta o URL del servidor
-        methods: ["GET", "POST"],
-        credentials: true
+       origin: "*", 
+       methods: ["GET", "POST"],
+       credentials: true
     }
 });
-
 const usuariosOnline = {}; // { id: nombre }
 
 // ===============================
-// CONEXIÓN A LA BASE DE DATOS (Tu Historial vive aquí)
+// CONEXIÓN A LA BASE DE DATOS (Configuración para Railway)
 // ===============================
 const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "nexus_db"
+    // Railway inyecta estas variables automáticamente si usas su MySQL
+    host: process.env.MYSQLHOST || "localhost",
+    user: process.env.MYSQLUSER || "root",
+    password: process.env.MYSQLPASSWORD || "",
+    database: process.env.MYSQLDATABASE || "nexus_db",
+    port: process.env.MYSQLPORT || 3306
 });
 
 db.connect(err => {
     if (err) {
-        console.error("❌ Error conectando a la DB:", err);
+        console.error("❌ Error conectando a la DB:", err.message);
         return;
     }
     console.log("📡 Conectado a la base de datos MySQL");
 });
 
-// Evitar caídas del servidor por errores de conexión de la DB
-db.on('error', (err) => {
-    console.error('Error en la base de datos:', err);
-    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-        console.error('Conexión perdida con la base de datos.');
-    }
-});
+// Mantener la conexión viva (Evita el error PROTOCOL_CONNECTION_LOST)
+setInterval(() => {
+    db.query('SELECT 1');
+}, 5000);
 
 app.use(express.static(__dirname));
 
@@ -204,7 +203,7 @@ io.on("connection", (socket) => {
 // ===============================
 // INICIAR SERVIDOR
 // ===============================
-const PORT = 3000;
+
 http.listen(PORT, () => {
     console.log(`✅ Servidor NEXUS activo en http://localhost:${PORT}`);
 });

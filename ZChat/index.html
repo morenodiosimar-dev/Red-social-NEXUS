@@ -65,16 +65,27 @@
 
     <!--Iconos inferiores salen en la pantalla principal lista chats-->
 <div class="iconos-inferiores">
-    <ion-icon name="home-outline" onclick="window.location.href='http://localhost/Proyecto%20Prueba/cuenta.php'" class="icon"></ion-icon>
-    
-    <ion-icon name="search-outline" onclick="window.location.href='http://localhost/Proyecto%20Prueba/busqueda.php'" class="icon"></ion-icon>
-    
-    <ion-icon name="chatbubble-outline" onclick="window.location.href='http://localhost:3000'" class="icon active-icon"></ion-icon>
-    
-    <ion-icon name="person-outline" onclick="window.location.href='http://localhost/Proyecto%20Prueba/perfil.php'"class="icon"></ion-icon>
-</div>
+        <ion-icon name="home-outline" onclick="navegar('../cuenta.php')" class="icon"></ion-icon>
+        <ion-icon name="search-outline" onclick="navegar('../busqueda.php')" class="icon"></ion-icon>
+        <ion-icon name="chatbubble-outline" onclick="navegar('/')" class="icon active-icon"></ion-icon>
+        <ion-icon name="person-outline" onclick="navegar('../perfil.php')" class="icon"></ion-icon>
+    </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="scritp.js"></script>
+    <script>
+        // Función para navegar sin depender de localhost
+        function navegar(ruta) {
+            const IS_LOCAL = window.location.hostname === "localhost";
+            if (IS_LOCAL) {
+                // En tu PC, mantienes la estructura de carpetas de XAMPP
+                if (ruta === '/') window.location.href = "http://localhost:3000";
+                else window.location.href = "http://localhost/Proyecto%20Prueba/" + ruta.replace('../', '');
+            } else {
+                // En Railway, todo está en la misma URL base
+                window.location.href = ruta;
+            }
+        }
+    </script>
 </body>
 </html>

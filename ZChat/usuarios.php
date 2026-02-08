@@ -1,14 +1,30 @@
 
 <?php
-header("Access-Control-Allow-Origin: http://localhost:3000");
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$allowed_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://tu-app-en-railway.up.railway.app" // Reemplaza con tu URL real de Railway después
+];
+
+if (in_array($origin, $allowed_origins)) {
+    header("Access-Control-Allow-Origin: $origin");
+}
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header('Content-Type: application/json; charset=utf-8');
 
-// Aquí sigue tu código de session_start() y validación...
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') exit;
 
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db");
+// --- 2. CONEXIÓN DINÁMICA A BASE DE DATOS ---
+$host = getenv('MYSQLHOST') ?: "127.0.0.1";
+$user = getenv('MYSQLUSER') ?: "root";
+$pass = getenv('MYSQLPASSWORD') ?: "";
+$db   = getenv('MYSQLDATABASE') ?: "nexus_db";
+$port = getenv('MYSQLPORT') ?: "3306";
+
+$conn = new mysqli($host, $user, $pass, $db, $port);
 
 // Seleccionamos los campos incluyendo el ID
 $res = $conn->query("SELECT id, nombre, apellido, correo, foto_perfil FROM usuarios");

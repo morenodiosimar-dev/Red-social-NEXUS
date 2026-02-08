@@ -1,0 +1,6 @@
+RewriteEngine On
+# Si el archivo no existe, no hagas nada
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+# Esto permite que las rutas de PHP funcionen correctamente
+RewriteRule ^(.*)$ $1.php [L,QSA]

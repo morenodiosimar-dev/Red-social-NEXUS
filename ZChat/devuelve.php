@@ -1,5 +1,19 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:3000");
+// --- 1. CONFIGURACIÓN DE CORS DINÁMICO ---
+// Detectamos el origen de la solicitud
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+// Lista de URLs permitidas (Tu local y tu futura URL de Railway)
+$allowed_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://tu-app-en-railway.up.railway.app" // Cambia esto cuando tengas la URL de Railway
+];
+
+if (in_array($origin, $allowed_origins)) {
+    header("Access-Control-Allow-Origin: $origin");
+}
+
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
@@ -10,6 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
 session_start();
 
+$host = getenv('MYSQLHOST') ?: "127.0.0.1";
+$user = getenv('MYSQLUSER') ?: "root";
+$pass = getenv('MYSQLPASSWORD') ?: "";
+$db   = getenv('MYSQLDATABASE') ?: "nexus_db";
+$port = getenv('MYSQLPORT') ?: "3306";
+
 if (isset($_SESSION['nombre'])) {
     // Unimos el nombre y apellido de la sesión
     $nombre_completo = trim($_SESSION['nombre'] . " " . ($_SESSION['apellido'] ?? ''));
@@ -19,7 +39,8 @@ if (isset($_SESSION['nombre'])) {
     
     // Si no está en la sesión, lo buscamos en la base de datos
     if (!$id_usuario) {
-        $conn = new mysqli("127.0.0.1", "root", "", "nexus_db");
+        // Usamos la configuración dinámica de arriba
+        $conn = new mysqli($host, $user, $pass, $db, $port);
         if ($conn->connect_error) {
             echo json_encode(["success" => false, "error" => "Error de conexión"]);
             exit;

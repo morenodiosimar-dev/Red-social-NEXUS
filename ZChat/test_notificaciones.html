@@ -49,7 +49,8 @@
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
     <script>
         let socket = null;
-        
+        const IS_LOCAL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+        const SERVER_URL = IS_LOCAL ? "http://localhost:3000" : window.location.origin;
         // Inicializar estado del sistema
         function updateSystemStatus() {
             document.getElementById('doc-visibility').textContent = document.hidden ? 'Oculto' : 'Visible';
@@ -119,8 +120,8 @@
             if (socket) {
                 socket.disconnect();
             }
-            
-            socket = io('http://localhost:3000');
+            // Conecta a la URL detectada automáticamente
+            socket = io(SERVER_URL);
             
             socket.on('connect', () => {
                 document.getElementById('connection-status').className = 'status success';

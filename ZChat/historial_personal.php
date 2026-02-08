@@ -22,17 +22,21 @@
     </div>
 
     <script>
+        const IS_LOCAL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+        
+        // Si es local usa puerto 3000, si es Railway usa la URL actual
+        const SOCKET_URL = IS_LOCAL ? "http://localhost:3000" : window.location.origin;
+        const PHP_SERVER_URL = IS_LOCAL ? "http://localhost/chat" : window.location.origin;
         const debug = document.getElementById("status-debug");
         const contenedor = document.getElementById("lista-historial");
 
-        // 1. Intentar conectar con Node.js
-        const socket = io("http://localhost:3000");
+        const socket = io(SOCKET_URL);
 
         socket.on("connect", () => {
             debug.innerText = "✅ Conectado al servidor de Chat";
             
             // 2. Una vez conectado el socket, pedimos el usuario a PHP
-            fetch("devuelve.php")
+           fetch(`${PHP_SERVER_URL}/devuelve.php`, { credentials: 'include' })
                 .then(res => res.json())
                 .then(data => {
                     if (data.success && data.usuario && data.id_usuario) {
@@ -83,8 +87,7 @@
                 `;
                 div.onclick = () => {
                     // Pasar el ID del contacto en la URL (el script principal puede buscar por ID o nombre)
-                    window.location.href = "http://localhost:3000?contacto=" + encodeURIComponent(idContacto);
-                };
+                   window.location.href = `${SOCKET_URL}?contacto=${encodeURIComponent(idContacto)}`;
                 contenedor.appendChild(div);
             });
         });

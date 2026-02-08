@@ -1,6 +1,14 @@
 console.log("NEXUS Chat: Sistema cargado");
 
-const socket = io("http://localhost:3000", { withCredentials: true });
+const IS_LOCAL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+
+// URLs dinámicas para que funcionen en Local y en Railway
+const PHP_SERVER_URL = IS_LOCAL ? "http://localhost/chat" : window.location.origin;
+const SOCKET_URL = IS_LOCAL ? "http://localhost:3000" : "https://tu-app-en-railway.up.railway.app";
+
+// 2. INICIALIZAR SOCKET CON LA URL DINÁMICA
+const socket = io(SOCKET_URL, { withCredentials: true });
+
 let salaActual = null;
 let usuarioActual = null;
 let idUsuarioActual = null;
@@ -16,7 +24,10 @@ if (Notification.permission !== "granted" && Notification.permission !== "denied
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    fetch("http://localhost/chat/devuelve.php", { credentials: 'include' })
+    fetch(`${PHP_SERVER_URL}/devuelve.php`, { 
+        method: 'GET',
+        credentials: 'include' // Esto permite que PHP reconozca quién está logueado
+    })
         .then(res => res.json())
         .then(data => {
             usuarioActual = data.usuario || "Invitado-" + Math.floor(Math.random() * 1000);
@@ -275,7 +286,7 @@ function iniciarChat() {
     const listaDerecha = document.getElementById("lista-derecha");
 
     // CARGAR LISTA PRINCIPAL
-    fetch("http://localhost/chat/usuarios.php")
+ fetch(`${PHP_SERVER_URL}/usuarios.php`)
         .then(res => res.json())
         .then(usuarios => {
             lista.innerHTML = "";
@@ -308,7 +319,7 @@ function iniciarChat() {
         });
 
     // CARGAR LISTA DERECHA
-    fetch("http://localhost/chat/usuarios.php")
+   fetch(`${PHP_SERVER_URL}/usuarios.php`)
         .then(res => res.json())
         .then(usuarios => {
             listaDerecha.innerHTML = "";

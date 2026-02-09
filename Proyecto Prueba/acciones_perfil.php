@@ -1,6 +1,15 @@
 <?php
 session_start();
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db",3306);
+
+// DATOS DE RAILWAY (Copia y pega esto)
+$servername = "mysql.railway.internal"; 
+$username = "root";
+$password = "BpFRhFTLghAcqTRozKXkQyajMlYVqZCw";
+$dbname = "railway"; // <-- En Railway tu BD se llama así
+$port = 3306;
+
+$conn = new mysqli($servername, $username, $password, $dbname, $port);
+
 
 $usuario_id = $_SESSION['usuario_id']; // quien da click
 $seguido_id = $_POST['seguido_id'];    // quien recibe el follow

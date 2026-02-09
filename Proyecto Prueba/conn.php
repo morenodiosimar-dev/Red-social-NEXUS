@@ -4,10 +4,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$servername = "127.0.0.1";
+// DATOS DE RAILWAY (Copia y pega esto)
+$servername = "mysql.railway.internal"; 
 $username = "root";
-$password = "";
-$dbname = "nexus_db";
+$password = "BpFRhFTLghAcqTRozKXkQyajMlYVqZCw";
+$dbname = "railway"; // <-- En Railway tu BD se llama así
 $port = 3306;
 
 $conn = new mysqli($servername, $username, $password, $dbname, $port);

@@ -3,7 +3,15 @@ session_start();
 // Error reporting en 0 para evitar que mensajes de error rompan el JSON o el HTML del modal
 error_reporting(0);
 
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db", 3306);
+
+// DATOS DE RAILWAY (Copia y pega esto)
+$servername = "mysql.railway.internal"; 
+$username = "root";
+$password = "BpFRhFTLghAcqTRozKXkQyajMlYVqZCw";
+$dbname = "railway"; // <-- En Railway tu BD se llama así
+$port = 3306;
+
+$conn = new mysqli($servername, $username, $password, $dbname, $port);
 
 if (!isset($_GET['id'])) die("ID no recibido");
 

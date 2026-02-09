@@ -2,7 +2,16 @@
 session_start();
 header('Content-Type: application/json');
 // Conexión usando tus datos
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db", 3306);
+
+// DATOS DE RAILWAY (Copia y pega esto)
+$servername = "mysql.railway.internal"; 
+$username = "root";
+$password = "BpFRhFTLghAcqTRozKXkQyajMlYVqZCw";
+$dbname = "railway"; // <-- En Railway tu BD se llama así
+$port = 3306;
+
+$conn = new mysqli($servername, $username, $password, $dbname, $port);
+
 $usuario_id = $_SESSION['usuario_id'];
 
 // Si el JS envía "?leer=1", marcamos como leídas

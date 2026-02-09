@@ -24,7 +24,16 @@ if (!preg_match('/^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com)$/', $correo)) {
     exit;
 }
 
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db", 3306);
+
+// DATOS DE RAILWAY (Copia y pega esto)
+$servername = "mysql.railway.internal"; 
+$username = "root";
+$password = "BpFRhFTLghAcqTRozKXkQyajMlYVqZCw";
+$dbname = "railway"; // <-- En Railway tu BD se llama así
+$port = 3306;
+
+$conn = new mysqli($servername, $username, $password, $dbname, $port);
+
 if ($conn->connect_error) {
     echo json_encode(["status" => "error", "message" => "Error de conexión"]);
     exit;

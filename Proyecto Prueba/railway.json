@@ -3,6 +3,6 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "apachectl -D FOREGROUND"
+    "startCommand": "php -S 0.0.0.0:$PORT"
   }
 }

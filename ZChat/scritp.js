@@ -4,7 +4,7 @@ const IS_LOCAL = window.location.hostname === "localhost" || window.location.hos
 
 // URLs dinámicas para que funcionen en Local y en Railway
 const PHP_SERVER_URL = IS_LOCAL ? "http://localhost/chat" : window.location.origin;
-const SOCKET_URL = IS_LOCAL ? "http://localhost:3000" : "https://tu-app-en-railway.up.railway.app";
+const SOCKET_URL = IS_LOCAL ? "http://localhost:3000" : "red-social-nexus-production.up.railway.app";
 const PORT = process.env.PORT || 3000;
 // 2. INICIALIZAR SOCKET CON LA URL DINÁMICA
 const socket = io(SOCKET_URL, { withCredentials: true });

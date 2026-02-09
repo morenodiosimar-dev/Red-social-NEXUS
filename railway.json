@@ -1,0 +1,8 @@
+{
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "docker-php-entrypoint apache2-foreground & node chat/server.js"
+  }
+}

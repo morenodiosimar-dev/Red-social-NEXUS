@@ -47,7 +47,7 @@ setInterval(() => {
 app.use(express.static(__dirname));
 
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "index.html"));
+    res.sendFile(path.join(__dirname, "index.php"));
 });
 
 // ===============================
@@ -204,6 +204,6 @@ io.on("connection", (socket) => {
 // INICIAR SERVIDOR
 // ===============================
 
-http.listen(PORT, () => {
-    console.log(`✅ Servidor NEXUS activo en http://localhost:${PORT}`);
+http.listen(PORT, "0.0.0.0", () => {
+    console.log(`✅ Servidor NEXUS activo en el puerto ${PORT}`);
 });

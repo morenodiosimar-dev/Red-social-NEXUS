@@ -1,9 +1,8 @@
 {
   "build": {
-    "builder": "NIXPACKS",
-    "pkgs": ["php", "apache"]
+    "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "docker-php-entrypoint apache2-foreground"
+    "startCommand": "apachectl -D FOREGROUND"
   }
 }

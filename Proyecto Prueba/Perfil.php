@@ -5,7 +5,7 @@ $conn = new mysqli("127.0.0.1", "root", "", "nexus_db", 3306);
 
 // 2. Seguridad
 if (!isset($_SESSION['usuario_id'])) {
-    header("Location: Index.html");
+    header("Location: index.html");
     exit;
 }
 

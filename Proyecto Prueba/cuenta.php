@@ -775,7 +775,7 @@ body { background-color: #e9ecef !important; }
         <ion-icon name="search-outline"></ion-icon>
     </div>
     
-    <div class="icont" onclick="window.location.href='http://localhost:3000'">
+    <div class="icont" onclick="window.location.href='https://red-social-nexus-production.up.railway.app/'">
         <ion-icon name="chatbubble-outline"></ion-icon>
     </div>
     

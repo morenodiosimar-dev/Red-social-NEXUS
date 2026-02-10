@@ -293,7 +293,7 @@ function iniciarChat() {
     const listaDerecha = document.getElementById("lista-derecha");
 
     // CARGAR LISTA PRINCIPAL
- fetch(`${PHP_SERVER_URL}/usuarios.php`)
+    fetch("/api/usuarios")
         .then(res => res.json())
         .then(usuarios => {
             lista.innerHTML = "";
@@ -326,7 +326,7 @@ function iniciarChat() {
         });
 
     // CARGAR LISTA DERECHA
-   fetch(`${PHP_SERVER_URL}/usuarios.php`)
+    fetch("/api/usuarios")
         .then(res => res.json())
         .then(usuarios => {
             listaDerecha.innerHTML = "";

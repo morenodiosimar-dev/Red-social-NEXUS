@@ -5,6 +5,7 @@ const app = express();
 const http = require("http").createServer(app);
 const mysql = require("mysql2");
 const path = require("path");
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args)); // Necesario para el puente
 
 const PORT = process.env.PORT || 3000;
 // ===============================
@@ -46,30 +47,21 @@ setInterval(() => {
 
 app.use(express.static(__dirname));
 
+app.get("/api/usuarios", async (req, res) => {
+    try {
+        const fetch = (await import('node-fetch')).default; // Importación dinámica
+        const response = await fetch('http://127.0.0.1:3000/usuarios.php');
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        console.error("Error conectando con PHP:", error);
+        res.status(500).json({ error: "Error interno" });
+    }
+});
+
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
-
-// ===============================
-// LÓGICA DE SOCKET.IO (Comunicación en tiempo real)
-// ===============================
-io.on("connection", (socket) => {
-    console.log("🟢 Usuario conectado:", socket.id);
-
-    // Identificar usuario al conectar
-    socket.on("usuario_online", (data) => {
-        const usuarioData = typeof data === 'object' ? data : { nombre: data, id: null };
-        socket.username = usuarioData.nombre;
-        socket.userId = usuarioData.id;
-        
-        if (usuarioData.id) {
-            usuariosOnline[usuarioData.id] = usuarioData.nombre;
-        }
-        
-        console.log("Usuarios en línea:", usuariosOnline);
-        io.emit("usuarios_online", usuariosOnline);
-    });
-
     // Unirse a una sala y CARGAR HISTORIAL
     socket.on("unirse_sala", (data) => {
         const sala = (typeof data === 'object') ? data.sala : data;
@@ -198,7 +190,7 @@ io.on("connection", (socket) => {
             });
         });
     });
-});
+
 
 // ===============================
 // INICIAR SERVIDOR

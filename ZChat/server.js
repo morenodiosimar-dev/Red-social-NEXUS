@@ -47,16 +47,22 @@ setInterval(() => {
 
 app.use(express.static(__dirname));
 
-app.get("/api/usuarios", async (req, res) => {
-    try {
-        const fetch = (await import('node-fetch')).default; // Importación dinámica
-        const response = await fetch('http://127.0.0.1:3000/usuarios.php');
-        const data = await response.json();
-        res.json(data);
-    } catch (error) {
-        console.error("Error conectando con PHP:", error);
-        res.status(500).json({ error: "Error interno" });
-    }
+app.get("/api/usuarios", (req, res) => {
+    // Node le pregunta a PHP en el puerto interno 3000
+    httpClient.get('http://127.0.0.1:3000/usuarios.php', (phpRes) => {
+        let data = '';
+        phpRes.on('data', (chunk) => { data += chunk; });
+        phpRes.on('end', () => {
+            try {
+                res.json(JSON.parse(data));
+            } catch (e) {
+                res.status(500).json({ error: "PHP no devolvió JSON válido" });
+            }
+        });
+    }).on('error', (err) => {
+        console.error("Error puente PHP:", err.message);
+        res.status(500).json({ error: "PHP no iniciado aún" });
+    });
 });
 
 app.get("/", (req, res) => {

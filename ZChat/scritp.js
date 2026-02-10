@@ -2,12 +2,19 @@ console.log("NEXUS Chat: Sistema cargado");
 
 const IS_LOCAL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
-// URLs dinámicas para que funcionen en Local y en Railway
+// 1. CONFIGURACIÓN DE URLS DINÁMICAS (CORREGIDO)
+// En Railway, window.location.origin es "https://red-social-nexus-production.up.railway.app"
 const PHP_SERVER_URL = IS_LOCAL ? "http://localhost/chat" : window.location.origin;
-const SOCKET_URL = IS_LOCAL ? "http://localhost:3000" : "red-social-nexus-production.up.railway.app";
+
+// Para Socket.io en Railway, lo más seguro es usar la misma URL de origen con https
+const SOCKET_URL = IS_LOCAL ? "http://localhost:3000" : window.location.origin;
+
 const PORT = process.env.PORT || 3000;
 // 2. INICIALIZAR SOCKET CON LA URL DINÁMICA
-const socket = io(SOCKET_URL, { withCredentials: true });
+const socket = io(SOCKET_URL, {
+     withCredentials: true, 
+     transports: ['polling', 'websocket']
+    });
 
 let salaActual = null;
 let usuarioActual = null;

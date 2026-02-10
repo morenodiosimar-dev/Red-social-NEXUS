@@ -46,28 +46,26 @@ setInterval(() => {
 }, 5000);
 
 app.use(express.static(__dirname));
-
-app.get("/api/usuarios", (req, res) => {
-    // Node le pregunta a PHP en el puerto interno 3000
-    httpClient.get('http://127.0.0.1:3000/usuarios.php', (phpRes) => {
-        let data = '';
-        phpRes.on('data', (chunk) => { data += chunk; });
-        phpRes.on('end', () => {
-            try {
-                res.json(JSON.parse(data));
-            } catch (e) {
-                res.status(500).json({ error: "PHP no devolvió JSON válido" });
-            }
-        });
-    }).on('error', (err) => {
-        console.error("Error puente PHP:", err.message);
-        res.status(500).json({ error: "PHP no iniciado aún" });
-    });
-});
-
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
+
+
+// Identificar usuario
+socket.on("usuario_online", (data) => {
+    const usuarioData = typeof data === 'object' ? data : { nombre: data, id: null };
+    socket.username = usuarioData.nombre;
+    socket.userId = usuarioData.id;
+    if (usuarioData.id) {
+        usuariosOnline[usuarioData.id] = usuarioData.nombre;
+    }
+    io.emit("usuarios_online", usuariosOnline);
+});
+
+
+io.on("connection", (socket) => {
+    console.log("🟢 Usuario conectado:", socket.id);
+
     // Unirse a una sala y CARGAR HISTORIAL
     socket.on("unirse_sala", (data) => {
         const sala = (typeof data === 'object') ? data.sala : data;
@@ -196,7 +194,7 @@ app.get("/", (req, res) => {
             });
         });
     });
-
+});
 
 // ===============================
 // INICIAR SERVIDOR

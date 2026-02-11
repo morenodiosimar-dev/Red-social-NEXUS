@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Test de Notificaciones</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <h1>🔔 Test del Sistema de Notificaciones</h1>
+    
+    <div class="test-section">
+        <h2>1. Verificar Permisos de Notificación</h2>
+        <button onclick="checkPermissions()">Verificar Permisos</button>
+        <button onclick="requestPermissions()">Solicitar Permisos</button>
+        <div id="permission-status" class="status info">Haz clic para verificar permisos</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Probar Notificación Manual</h2>
+        <button onclick="testNotification()">Enviar Notificación de Prueba</button>
+        <div id="notification-status" class="status info">Haz clic para probar notificación</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Conectar al Chat</h2>
+        <button onclick="connectToChat()">Conectar al Servidor</button>
+        <button onclick="disconnectFromChat()">Desconectar</button>
+        <div id="connection-status" class="status info">No conectado</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Estado del Sistema</h2>
+        <div id="system-status">
+            <p><strong>Estado del Documento:</strong> <span id="doc-visibility">Visible</span></p>
+            <p><strong>Soporte de Notificaciones:</strong> <span id="notification-support">Verificando...</span></p>
+            <p><strong>Socket Conectado:</strong> <span id="socket-status">No</span></p>
+        </div>
+    </div>
+
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+        let socket = null;
+        const IS_LOCAL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+        const SERVER_URL = IS_LOCAL ? "http://localhost:3000" : window.location.origin;
+        // Inicializar estado del sistema
+        function updateSystemStatus() {
+            document.getElementById('doc-visibility').textContent = document.hidden ? 'Oculto' : 'Visible';
+            document.getElementById('notification-support').textContent = 'Notification' in window ? 'Sí' : 'No';
+        }
+        
+        // Verificar permisos
+        function checkPermissions() {
+            const status = document.getElementById('permission-status');
+            const permission = Notification.permission;
+            
+            status.className = 'status info';
+            status.textContent = `Estado de permisos: ${permission}`;
+            
+            if (permission === 'granted') {
+                status.className = 'status success';
+                status.textContent += ' ✅ - Las notificaciones están habilitadas';
+            } else if (permission === 'denied') {
+                status.className = 'status error';
+                status.textContent += ' ❌ - Las notificaciones están bloqueadas';
+            } else {
+                status.textContent += ' ⏳ - Se necesitan permisos';
+            }
+        }
+        
+        // Solicitar permisos
+        function requestPermissions() {
+            Notification.requestPermission().then(permission => {
+                checkPermissions();
+            });
+        }
+        
+        // Probar notificación
+        function testNotification() {
+            const status = document.getElementById('notification-status');
+            
+            if (Notification.permission !== 'granted') {
+                status.className = 'status error';
+                status.textContent = '❌ Se necesitan permisos de notificación primero';
+                return;
+            }
+            
+            try {
+                const notification = new Notification('Test de Notificación', {
+                    body: 'Esta es una notificación de prueba desde Nexus Chat',
+                    icon: '/img/default.png',
+                    tag: 'test-notification'
+                });
+                
+                notification.onclick = () => {
+                    notification.close();
+                    window.focus();
+                };
+                
+                setTimeout(() => notification.close(), 3000);
+                
+                status.className = 'status success';
+                status.textContent = '✅ Notificación enviada correctamente';
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        // Conectar al chat
+        function connectToChat() {
+            if (socket) {
+                socket.disconnect();
+            }
+            // Conecta a la URL detectada automáticamente
+            socket = io(SERVER_URL);
+            
+            socket.on('connect', () => {
+                document.getElementById('connection-status').className = 'status success';
+                document.getElementById('connection-status').textContent = '✅ Conectado al servidor';
+                document.getElementById('socket-status').textContent = 'Sí';
+                
+                // Simular usuario
+                socket.emit('usuario_online', { 
+                    nombre: 'Usuario Test', 
+                    id: 999 
+                });
+            });
+            
+            socket.on('disconnect', () => {
+                document.getElementById('connection-status').className = 'status error';
+                document.getElementById('connection-status').textContent = '❌ Desconectado';
+                document.getElementById('socket-status').textContent = 'No';
+            });
+            
+            socket.on('notificacion_nuevo_mensaje', (data) => {
+                const { nombre_remitente, mensaje } = data;
+                
+                // Mostrar notificación
+                if (Notification.permission === 'granted') {
+                    const notification = new Notification(`Nuevo mensaje de ${nombre_remitente}`, {
+                        body: mensaje,
+                        icon: '/img/default.png',
+                        tag: 'nexus-chat'
+                    });
+                    
+                    setTimeout(() => notification.close(), 5000);
+                }
+                
+                // Actualizar UI
+                const status = document.getElementById('connection-status');
+                status.innerHTML += `<br>📨 Mensaje recibido: ${mensaje}`;
+            });
+        }
+        
+        // Desconectar
+        function disconnectFromChat() {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+            }
+            
+            document.getElementById('connection-status').className = 'status info';
+            document.getElementById('connection-status').textContent = 'No conectado';
+            document.getElementById('socket-status').textContent = 'No';
+        }
+        
+        // Detectar cambios de visibilidad
+        document.addEventListener('visibilitychange', () => {
+            updateSystemStatus();
+        });
+        
+        // Inicializar
+        updateSystemStatus();
+        checkPermissions();
+    </script>
+</body>
+</html>

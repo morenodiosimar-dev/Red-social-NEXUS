@@ -23,7 +23,7 @@ if (Notification.permission !== "granted" && Notification.permission !== "denied
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    fetch(`/api/devolver`, { 
+    fetch(`/api/devuelve`, { 
         method: 'GET',
         credentials: 'include' // Esto permite que PHP reconozca quién está logueado
     })

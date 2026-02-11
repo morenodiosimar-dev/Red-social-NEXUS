@@ -3,6 +3,8 @@ const app = express();
 const http = require("http").createServer(app);
 const mysql = require("mysql2");
 const session = require("express-session");
+const path = require("path"); // <--- ESTA LÍNEA ES VITAL
+const express = require("express");
 
 // ===============================
 // CONFIGURACIÓN DE SOCKET.IO

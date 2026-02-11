@@ -36,7 +36,7 @@
             debug.innerText = "✅ Conectado al servidor de Chat";
             
             // 2. Una vez conectado el socket, pedimos el usuario a PHP
-           fetch(`${PHP_SERVER_URL}/devuelve.php`, { credentials: 'include' })
+           fetch(`/api/devolver_usuario`, { credentials: 'include' })
                 .then(res => res.json())
                 .then(data => {
                     if (data.success && data.usuario && data.id_usuario) {
@@ -89,7 +89,8 @@
                     // Pasar el ID del contacto en la URL (el script principal puede buscar por ID o nombre)
                    window.location.href = `${SOCKET_URL}?contacto=${encodeURIComponent(idContacto)}`;
                 contenedor.appendChild(div);
-            });
+            };
+        });
         });
     </script>
 </body>

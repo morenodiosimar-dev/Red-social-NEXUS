@@ -1,20 +1,12 @@
 console.log("NEXUS Chat: Sistema cargado");
 
 const IS_LOCAL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-
-// 1. CONFIGURACIÓN DE URLS DINÁMICAS (CORREGIDO)
-// En Railway, window.location.origin es "https://red-social-nexus-production.up.railway.app"
-const PHP_SERVER_URL = IS_LOCAL ? "http://localhost/chat" : window.location.origin;
-
-// Para Socket.io en Railway, lo más seguro es usar la misma URL de origen con https
 const SOCKET_URL = IS_LOCAL ? "http://localhost:3000" : window.location.origin;
 
-const PORT = process.env.PORT || 3000;
-// 2. INICIALIZAR SOCKET CON LA URL DINÁMICA
 const socket = io(SOCKET_URL, {
-     withCredentials: true, 
-     transports: ['polling', 'websocket']
-    });
+    withCredentials: true,
+    transports: ['websocket', 'polling']
+});
 
 let salaActual = null;
 let usuarioActual = null;
@@ -31,7 +23,7 @@ if (Notification.permission !== "granted" && Notification.permission !== "denied
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    fetch(`${PHP_SERVER_URL}/devuelve.php`, { 
+    fetch(`/api/devolver`, { 
         method: 'GET',
         credentials: 'include' // Esto permite que PHP reconozca quién está logueado
     })
@@ -205,7 +197,7 @@ function enviarNotificacionSistema(usuario, mensaje) {
 function crearNotificacion(usuario, mensaje) {
     const noti = new Notification(`Nuevo mensaje de ${usuario}`, {
         body: mensaje,
-        icon: "http://localhost/Chat/img/default.png",
+     icon: "./img/default.png",
         badge: "http://localhost/Chat/img/default.png",
         tag: 'nexus-chat', // Para agrupar notificaciones
         requireInteraction: false,
@@ -434,17 +426,7 @@ function iniciarChat() {
         // Guardar borrador de la sala anterior si existe
         if (salaActual) {
             document.getElementById("msgInput").value = ""; // Limpiar visualmente, aunque se guarda al cambiar
-            // Nota: La lógica de guardar borradores al cambiar desde la derecha debería ser similar, 
-            // pero como aquí ya cambiamos salaActual, guardémoslo ANTES de pisotear la variable.
-            // Sin embargo, `salaActual` se actualiza unas líneas arriba. 
-            // CORRECCIÓN: La lógica de arriba ya actualizó salaActual.
-            // Debemos guardar ANTES de cambiar salaActual. Pero en este bloque de código:
-            // `salaActual` se calcula justo antes.
-            // Necesitamos guardar el borrador de la sala VIEJA antes de calcular la NUEVA.
         }
-
-        // El bloque original calcula `idsSala` y asigna `salaActual` inmediatamente.
-        // Vamos a modificar para guardar antes.
 
         // --- INICIO MODIFICACIÓN ---
         // Recuperar sala anterior real antes de sobrescribir
@@ -468,9 +450,9 @@ function iniciarChat() {
         // Actualizar la foto del contacto en el header
         const fotoHeader = document.getElementById("fotoChatSeleccionado");
         if (fotoHeader) {
-            fotoHeader.src = `http://localhost/Proyecto%20Prueba/img/${fotoContacto}`;
+            fotoHeader.src = `./img/${fotoContacto}`;
             fotoHeader.onerror = function () {
-                this.src = 'http://localhost/Proyecto%20Prueba/img/default.png';
+                this.src = 'img/default.png';
             };
         }
 

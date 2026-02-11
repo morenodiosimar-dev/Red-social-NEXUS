@@ -23,17 +23,12 @@ const usuariosOnline = {}; // Usuarios conectados
 // CONEXIÓN A LA BASE DE DATOS
 // ===============================
 const db = mysql.createPool({
-    host: "mysql.railway.internal",
-    user: "root",
-    password: "BpFRhFTLghAcqTRozKXkQyajMlYVqZCw",
-    database: "railway",
-    port: 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-    connectTimeout: 10000 
+    host: process.env.MYSQLHOST || "mysql.railway.internal",
+    user: process.env.MYSQLUSER || "root",
+    password: process.env.MYSQLPASSWORD || "BpFRhFTLghAcqTRozKXkQyajMlYVqZCw",
+    database: process.env.MYSQLDATABASE || "railway",
+    port: process.env.MYSQLPORT || 3306
 });
-
 db.query("SELECT 1", (err) => {
     if (err) console.error("❌ MySQL no responde:", err.message);
     else console.log("📡 MySQL listo y operativo");

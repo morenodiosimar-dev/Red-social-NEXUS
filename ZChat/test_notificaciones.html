@@ -96,7 +96,7 @@
             try {
                 const notification = new Notification('Test de Notificación', {
                     body: 'Esta es una notificación de prueba desde Nexus Chat',
-                    icon: 'http://localhost/Chat/img/default.png',
+                    icon: '/img/default.png',
                     tag: 'test-notification'
                 });
                 
@@ -148,7 +148,7 @@
                 if (Notification.permission === 'granted') {
                     const notification = new Notification(`Nuevo mensaje de ${nombre_remitente}`, {
                         body: mensaje,
-                        icon: 'http://localhost/Chat/img/default.png',
+                        icon: '/img/default.png',
                         tag: 'nexus-chat'
                     });
                     

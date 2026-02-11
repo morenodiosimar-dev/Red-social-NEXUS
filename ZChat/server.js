@@ -1,10 +1,9 @@
 const express = require("express");
+const path = require("path");
 const app = express();
 const http = require("http").createServer(app);
 const mysql = require("mysql2");
 const session = require("express-session");
-const path = require("path"); // <--- ESTA LÍNEA ES VITAL
-const express = require("express");
 
 // ===============================
 // CONFIGURACIÓN DE SOCKET.IO
@@ -32,7 +31,6 @@ const db = mysql.createPool({
     queueLimit: 0
 });
 
-// Prueba de conexión inicial para el Pool
 db.getConnection((err, connection) => {
     if (err) {
         console.error("❌ Error conectando a la DB en Railway:", err.message);
@@ -43,7 +41,7 @@ db.getConnection((err, connection) => {
 });
 
 // ===============================
-// MIDDLEWARES
+// MIDDLEWARES Y ARCHIVOS ESTÁTICOS
 // ===============================
 app.use(session({
     secret: 'te-llamo-desde-nexus',
@@ -55,10 +53,12 @@ app.use(session({
     }
 }));
 
-// ===============================
-// RUTAS API (Fuera de io.on)
-// ===============================
+// ESTA LÍNEA ES NUEVA: Sirve tu HTML, CSS y JS desde la raíz o carpeta public
+app.use(express.static(__dirname)); 
 
+// ===============================
+// RUTAS API
+// ===============================
 app.get('/api/usuarios', (req, res) => {
     const query = "SELECT id, nombre, apellido, correo, foto_perfil, CONCAT(nombre, ' ', apellido) as nombre_completo FROM usuarios";
     db.query(query, (err, results) => {
@@ -79,18 +79,12 @@ app.get("/api/devolver_usuario", (req, res) => {
     }
 });
 
-// RUTA PUENTE: Para recibir datos del login externo
 app.get("/api/set_session_externa", (req, res) => {
     const { id, nombre } = req.query;
     if (id && nombre) {
         req.session.userId = id;
         req.session.nombreCompleto = nombre;
-        return res.send(`
-            <script>
-                console.log("Sesión sincronizada");
-                window.location.href = "/"; 
-            </script>
-        `);
+        return res.send(`<script>window.location.href = "/";</script>`);
     }
     res.redirect("/");
 });
@@ -131,8 +125,7 @@ io.on("connection", (socket) => {
         db.query(query, [sala, id_usuario, mensaje], (err) => {
             if (err) return console.error(err);
             io.to(sala).emit("mensaje_recibido", data);
-
-            // Lógica de notificaciones
+            
             const idsSala = sala.split('-').map(id => parseInt(id));
             const idDestinatario = idsSala.find(id => id !== parseInt(id_usuario));
             
@@ -158,50 +151,29 @@ io.on("connection", (socket) => {
         }
     });
 
-    // Obtener historial de contactos (basado en IDs)
     socket.on("obtener_historial_contactos", (data) => {
         const miId = typeof data === 'object' ? data.id_usuario : data;
-        
-        // Buscar salas que contengan el ID del usuario
         const query = "SELECT DISTINCT sala FROM mensajes WHERE sala LIKE ? OR sala LIKE ?";
-        const busqueda1 = `${miId}-%`;
-        const busqueda2 = `%-${miId}`;
-
-        db.query(query, [busqueda1, busqueda2], (err, results) => {
+        db.query(query, [`${miId}-%`, `%-${miId}`], (err, results) => {
             if (err) return console.error(err);
 
-            // Extraer el ID del contacto (el que no es el usuario actual)
             const contactosIds = [];
             results.forEach(row => {
                 const partes = row.sala.split('-').map(id => parseInt(id));
                 const otroId = partes.find(id => id !== parseInt(miId));
-                if (otroId && !contactosIds.includes(otroId)) {
-                    contactosIds.push(otroId);
-                }
+                if (otroId && !contactosIds.includes(otroId)) contactosIds.push(otroId);
             });
 
-            // Obtener los nombres de los contactos desde la base de datos
-            if (contactosIds.length === 0) {
-                socket.emit("enviar_historial_contactos", []);
-                return;
-            }
+            if (contactosIds.length === 0) return socket.emit("enviar_historial_contactos", []);
 
             const placeholders = contactosIds.map(() => '?').join(',');
-            const queryNombres = `SELECT id, nombre, apellido, foto_perfil FROM usuarios WHERE id IN (${placeholders})`;
-            db.query(queryNombres, contactosIds, (err2, usuarios) => {
-                if (err2) {
-                    console.error("Error obteniendo nombres:", err2);
-                    socket.emit("enviar_historial_contactos", contactosIds.map(id => id.toString()));
-                    return;
-                }
-
-                // Crear mapa de ID a nombre completo y foto de perfil
+            db.query(`SELECT id, nombre, apellido, foto_perfil FROM usuarios WHERE id IN (${placeholders})`, contactosIds, (err2, usuarios) => {
+                if (err2) return console.error(err2);
                 const contactos = usuarios.map(u => ({
                     id: u.id,
                     nombre_completo: `${u.nombre} ${u.apellido}`.trim(),
                     foto_perfil: u.foto_perfil || 'default.png'
                 }));
-
                 socket.emit("enviar_historial_contactos", contactos);
             });
         });
@@ -211,8 +183,7 @@ io.on("connection", (socket) => {
 // ===============================
 // INICIAR SERVIDOR
 // ===============================
-
-const PORT = process.env.PORT || 3000; // Railway siempre asigna el puerto en process.env.PORT
+const PORT = process.env.PORT || 3000;
 http.listen(PORT, "0.0.0.0", () => {
     console.log(`✅ Servidor NEXUS activo en el puerto ${PORT}`);
 });

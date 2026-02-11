@@ -46,10 +46,33 @@ setInterval(() => {
 
 app.use(express.static(__dirname));
 
+// ===============================
+// NUEVOS: PUENTES API PARA EL FRONTEND
+// ===============================
+
+// Reemplaza a 'usuarios.php'
+app.get("/api/usuarios", (req, res) => {
+    const query = "SELECT id, nombre, apellido, correo, foto_perfil, CONCAT(nombre, ' ', apellido) as nombre_completo FROM usuarios";
+    db.query(query, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+// Reemplaza a 'devuelve.php' (Simulación de sesión para Railway)
+app.get("/api/devolver_usuario", (req, res) => {
+    // Aquí podrías leer una cookie, pero por ahora devolvemos un ID de prueba 
+    // o el que necesites para que el chat no rompa
+    res.json({ 
+        success: true, 
+        id_usuario: 1, 
+        usuario: "Admin Local" 
+    });
+});
+
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
-
 // ===============================
 // LÓGICA DE SOCKET.IO (Comunicación en tiempo real)
 // ===============================

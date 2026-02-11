@@ -27,7 +27,13 @@ const db = mysql.createPool({
     user: process.env.MYSQLUSER || "root",
     password: process.env.MYSQLPASSWORD || "BpFRhFTLghAcqTRozKXkQyajMlYVqZCw",
     database: process.env.MYSQLDATABASE || "railway",
-    port: process.env.MYSQLPORT || 3306
+    port: process.env.MYSQLPORT || 3306,
+    waitForConnections: true,
+    connectionLimit: 5,
+    queueLimit: 0,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000
+
 });
 db.query("SELECT 1", (err) => {
     if (err) console.error("❌ MySQL no responde:", err.message);

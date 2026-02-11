@@ -23,7 +23,6 @@ const usuariosOnline = {};
 // ===============================
 // CONEXIÓN A LA BASE DE DATOS
 // ===============================
-const mysql = require("mysql2/promise");
 
 const db = mysql.createPool({
   host: process.env.MYSQLHOST,

@@ -23,7 +23,7 @@ if (Notification.permission !== "granted" && Notification.permission !== "denied
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    fetch(`/api/devolver_usuario`, { 
+    fetch(`devuelve.php`, { 
         method: 'GET',
         credentials: 'include' // Esto permite que PHP reconozca quién está logueado
     })
@@ -285,7 +285,7 @@ function iniciarChat() {
     const listaDerecha = document.getElementById("lista-derecha");
 
     // CARGAR LISTA PRINCIPAL
-    fetch("/api/usuarios")
+    fetch("usuarios.php")
         .then(res => res.json())
         .then(usuarios => {
             lista.innerHTML = "";
@@ -322,7 +322,7 @@ function iniciarChat() {
         });
 
     // CARGAR LISTA DERECHA
-    fetch("/api/usuarios")
+    fetch("usuarios.php")
         .then(res => res.json())
         .then(usuarios => {
             listaDerecha.innerHTML = "";

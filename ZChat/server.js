@@ -51,6 +51,39 @@ app.get("/", (req, res) => {
 });
 
 
+// ==========================================
+// COLÓCALOS AQUÍ (PUENTES API)
+// ==========================================
+
+// Puente para obtener la lista de usuarios desde MySQL
+app.get("/api/usuarios", (req, res) => {
+    const query = "SELECT id, nombre, apellido, correo, foto_perfil, CONCAT(nombre, ' ', apellido) as nombre_completo FROM usuarios";
+    db.query(query, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+// Puente para saber quién es el usuario logueado
+app.get("/api/devolver_usuario", async (req, res) => {
+    try {
+        // IMPORTANTE: En Railway, localhost:8080 no funcionará 
+        // a menos que tengas PHP corriendo ahí. 
+        // Si tu DB está en Railway, podrías consultar la sesión directo en la DB
+        // o usar la URL real de tu servicio PHP.
+        const response = await fetch("http://localhost:8080/devolver_usuario.php", {
+            headers: { cookie: req.headers.cookie || "" }
+        });
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.json({ success: false, message: "No se pudo conectar con el motor de sesión" });
+    }
+});
+
+io.on("connection", (socket) => {
+    console.log("🟢 Usuario conectado:", socket.id);
+
 // Identificar usuario
 socket.on("usuario_online", (data) => {
     const usuarioData = typeof data === 'object' ? data : { nombre: data, id: null };
@@ -62,9 +95,6 @@ socket.on("usuario_online", (data) => {
     io.emit("usuarios_online", usuariosOnline);
 });
 
-
-io.on("connection", (socket) => {
-    console.log("🟢 Usuario conectado:", socket.id);
 
     // Unirse a una sala y CARGAR HISTORIAL
     socket.on("unirse_sala", (data) => {

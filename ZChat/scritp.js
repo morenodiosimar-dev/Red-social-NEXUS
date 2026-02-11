@@ -291,23 +291,27 @@ function iniciarChat() {
             lista.innerHTML = "";
             mapaUsuarios = {}; // Reiniciar el mapa
             usuarios.forEach(u => {
-                // Comparar IDs convirtiendo ambos a números para evitar problemas de tipo
                 if (parseInt(u.id) !== parseInt(idUsuarioActual)) {
-                    mapaUsuarios[u.id] = u; // Guardar en el mapa
+                    mapaUsuarios[u.id] = u;
                     const div = document.createElement("div");
                     div.classList.add("chat-item");
-                    div.dataset.id = u.id; // Usar ID en lugar de nombre
-                    div.dataset.nombre = u.nombre_completo; // Mantener nombre para búsqueda
-                    // Manejar foto_perfil (puede ser null, undefined, o string vacío)
-                    const fotoPerfil = (u.foto_perfil && u.foto_perfil !== null && String(u.foto_perfil).trim() !== '')
-                        ? String(u.foto_perfil).trim()
-                        : 'default.png';
-                    div.dataset.foto = fotoPerfil; // Guardar foto para usar después
-
+                    div.dataset.id = u.id;
+                    div.dataset.nombre = u.nombre_completo;
+            
+                    // LÓGICA DE FOTO CORREGIDA
+                    let fotoFinal;
+                    if (!u.foto_perfil || u.foto_perfil === 'default.png') {
+                        fotoFinal = "./img/default.png";
+                    } else {
+                        // Si ya trae "uploads/", lo usamos directo desde la raíz
+                        fotoFinal = `./${u.foto_perfil}`;
+                    }
+                    div.dataset.foto = fotoFinal; // Guardamos la ruta real corregida
+            
                     div.innerHTML = `
-                        <img src="./img/${fotoPerfil}" class="foto-chat" style="width:45px; height:45px; border-radius:50%; margin-right:10px;" onerror="this.src='./img/default.png'">
+                        <img src="${fotoFinal}" class="foto-chat" style="width:45px; height:45px; border-radius:50%; margin-right:10px;" onerror="this.src='./img/default.png'">
                         <div>
-                            <h4 style="margin:0;">${u.nombre_completo} <span class="estado"></span></h4>
+                            <h4 style="margin:0;">${u.nombre_completo} <span class="estado" id="estado-${u.id}"></span></h4>
                             <p class="status-text" style="margin:0; font-size:12px; color:gray;">${u.correo}</p> 
                         </div>`;
                     lista.appendChild(div);

@@ -25,29 +25,26 @@ const usuariosOnline = {};
 // ===============================
 
 const db = mysql.createPool({
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-  port: process.env.MYSQLPORT,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+    host: process.env.MYSQLHOST,
+    user: process.env.MYSQLUSER,
+    password: process.env.MYSQLPASSWORD,
+    database: process.env.MYSQLDATABASE,
+    port: process.env.MYSQLPORT,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-
-db.connect(err => {
+db.query("SELECT 1", (err) => {
     if (err) {
-        console.error("❌ Error conectando a la DB:", err.message);
-        return;
+        console.error("❌ MySQL no responde:", err.message);
+    } else {
+        console.log("📡 MySQL listo y operativo");
     }
-    console.log("📡 Conectado a la base de datos MySQL");
 });
+
 
 setInterval(() => { db.query('SELECT 1'); }, 5000);
-
-app.use(express.static(path.join(__dirname, "public")));
-
 
 // Sustituye a 'usuarios.php'
 app.get("/api/usuarios", (req, res) => {

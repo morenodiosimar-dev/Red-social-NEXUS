@@ -6,7 +6,7 @@ const http = require("http").createServer(app);
 const mysql = require("mysql2");
 const path = require("path");
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args)); // Necesario para el puente
-
+const session = require("express-session");
 
 // ===============================
 // CONFIGURACIÓN DE SOCKET.IO
@@ -23,13 +23,15 @@ const usuariosOnline = {}; // { id: nombre }
 // ===============================
 // CONEXIÓN A LA BASE DE DATOS (Configuración para Railway)
 // ===============================
-const db = mysql.createConnection({
-    // Railway inyecta estas variables automáticamente si usas su MySQL
+// 2. Cambia createConnection por createPool (Es más estable en Railway)
+const db = mysql.createPool({
     host: process.env.MYSQLHOST || "localhost",
     user: process.env.MYSQLUSER || "root",
     password: process.env.MYSQLPASSWORD || "",
     database: process.env.MYSQLDATABASE || "railway",
-    port: process.env.MYSQLPORT || 3306
+    port: process.env.MYSQLPORT || 3306,
+    waitForConnections: true,
+    connectionLimit: 10
 });
 
 db.connect(err => {
@@ -45,44 +47,54 @@ setInterval(() => {
     db.query('SELECT 1');
 }, 5000);
 
-app.use(express.static(__dirname));
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "index.html"));
-});
-
-
-// ==========================================
-// COLÓCALOS AQUÍ (PUENTES API)
-// ==========================================
-
-// Puente para obtener la lista de usuarios desde MySQL
-app.get("/api/usuarios", (req, res) => {
-    const query = "SELECT id, nombre, apellido, correo, foto_perfil, CONCAT(nombre, ' ', apellido) as nombre_completo FROM usuarios";
-    db.query(query, (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json(results);
-    });
-});
-
-// Puente para saber quién es el usuario logueado
-app.get("/api/devolver_usuario", async (req, res) => {
-    try {
-        // IMPORTANTE: En Railway, localhost:8080 no funcionará 
-        // a menos que tengas PHP corriendo ahí. 
-        // Si tu DB está en Railway, podrías consultar la sesión directo en la DB
-        // o usar la URL real de tu servicio PHP.
-        const response = await fetch("http://localhost:8080/devolver_usuario.php", {
-            headers: { cookie: req.headers.cookie || "" }
-        });
-        const data = await response.json();
-        res.json(data);
-    } catch (error) {
-        res.json({ success: false, message: "No se pudo conectar con el motor de sesión" });
+app.use(session({
+    secret: 'te-llamo-desde-nexus',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production', // true si usas HTTPS en Railway
+        maxAge: 1000 * 60 * 60 * 24 // 24 horas
     }
-});
+}));
 
 io.on("connection", (socket) => {
     console.log("🟢 Usuario conectado:", socket.id);
+// ==========================================
+// RUTAS QUE REEMPLAZAN A PHP (PUENTES API)
+// ==========================================
+
+// REEMPLAZA TU RUTA /usuarios POR ESTA (Corregida)
+app.get('/api/usuarios', (req, res) => {
+    const query = "SELECT id, nombre, apellido, correo, foto_perfil, CONCAT(nombre, ' ', apellido) as nombre_completo FROM usuarios";
+    
+    db.query(query, (err, results) => {
+        if (err) return res.status(500).json({ error: "Error en DB" });
+
+        const usuarios = results.map(user => ({
+            ...user,
+            nombre_completo: user.nombre_completo || `${user.nombre} ${user.apellido}`.trim(),
+            foto_perfil: user.foto_perfil || 'default.png'
+        }));
+
+        res.json(usuarios);
+    });
+});
+
+// ESTE ES TU NUEVO "devuelve.php" (Sin fetch, directo de la sesión de Node)
+app.get("/api/devolver_usuario", (req, res) => {
+    if (req.session && req.session.userId) {
+        res.json({
+            success: true,
+            usuario: req.session.nombreCompleto,
+            id_usuario: req.session.userId
+        });
+    } else {
+        res.json({ 
+            success: false, 
+            message: "No hay sesión activa en el servidor de Node" 
+        });
+    }
+});
 
 // Identificar usuario
 socket.on("usuario_online", (data) => {

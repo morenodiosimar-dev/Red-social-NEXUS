@@ -23,11 +23,11 @@ const usuariosOnline = {}; // Usuarios conectados
 // CONEXIÓN A LA BASE DE DATOS
 // ===============================
 const dbConfig = {
-    host: process.env.MYSQLHOST || "mysql.railway.internal",
-    user: process.env.MYSQLUSER || "root",
+    host: process.env.MYSQLHOST,
+    user: process.env.MYSQLUSER ,
     password: process.env.MYSQLPASSWORD,
-    database: process.env.MYSQLDATABASE || "railway",
-    port: process.env.MYSQLPORT || 3306,
+    database: process.env.MYSQLDATABASE,
+    port: process.env.MYSQLPORT, 
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,

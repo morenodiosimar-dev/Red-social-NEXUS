@@ -23,11 +23,11 @@ const usuariosOnline = {}; // Usuarios conectados
 // CONEXIÓN A LA BASE DE DATOS
 // ===============================
 const db = mysql.createPool({
-    host: process.env.MYSQLHOST,
-    user: process.env.MYSQLUSER,
-    password: process.env.MYSQLPASSWORD,
-    database: process.env.MYSQLDATABASE,
-    port: process.env.MYSQLPORT,
+    host: "mysql.railway.internal",
+    user: "root",
+    password: "BpFRhFTLghAcqTRozKXkQyajMlYVqZCw",
+    database: "railway",
+    port: 3306,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0

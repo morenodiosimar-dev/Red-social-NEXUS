@@ -7,6 +7,7 @@ const mysql = require("mysql2");
 const path = require("path");
 
 const PORT = process.env.PORT || 3000;
+
 // ===============================
 // CONFIGURACIÓN DE SOCKET.IO
 // ===============================
@@ -17,21 +18,12 @@ const io = require("socket.io")(http, {
        credentials: true
     }
 });
-const usuariosOnline = {}; // { id: nombre }
-const { spawn } = require('child_process');
-// Levanta un servidor PHP interno en el puerto 8000
-spawn('php', ['-S', '127.0.0.1:8000', '-t', '.']);
+const usuariosOnline = {}; 
 
-// En tu server.js, redirige las peticiones .php al puerto 8000
-app.get('*.php', (req, res) => {
-    // Esto requiere instalar 'http-proxy-middleware'
-    // O simplemente migra la lógica a rutas de Express como en el Camino A
-});
 // ===============================
-// CONEXIÓN A LA BASE DE DATOS (Configuración para Railway)
+// CONEXIÓN A LA BASE DE DATOS
 // ===============================
 const db = mysql.createConnection({
-    // Railway inyecta estas variables automáticamente si usas su MySQL
     host: process.env.MYSQLHOST || "localhost",
     user: process.env.MYSQLUSER || "root",
     password: process.env.MYSQLPASSWORD || "",
@@ -47,147 +39,106 @@ db.connect(err => {
     console.log("📡 Conectado a la base de datos MySQL");
 });
 
-// Mantener la conexión viva (Evita el error PROTOCOL_CONNECTION_LOST)
-setInterval(() => {
-    db.query('SELECT 1');
-}, 5000);
+setInterval(() => { db.query('SELECT 1'); }, 5000);
 
+// Servir archivos estáticos (HTML, JS, CSS, IMG)
 app.use(express.static(__dirname));
 
 // ===============================
-// NUEVOS: PUENTES API PARA EL FRONTEND
+// API ENDPOINTS (Reemplazan a los archivos .php)
 // ===============================
 
-// Reemplaza a 'usuarios.php'
-// Reemplaza el fetch a usuarios.php por esta ruta en server.js
+// Sustituye a 'usuarios.php'
 app.get("/api/usuarios", (req, res) => {
     const query = "SELECT id, nombre, apellido, correo, foto_perfil FROM usuarios";
     db.query(query, (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         
-        // Formateamos los datos igual que lo hacía tu PHP
         const usuarios = results.map(u => ({
             ...u,
             nombre_completo: `${u.nombre} ${u.apellido}`,
-            foto_perfil: u.foto_perfil || 'default.png'
+            foto_perfil: (u.foto_perfil && u.foto_perfil !== 'default.png') ? u.foto_perfil : 'default.png'
         }));
-        
         res.json(usuarios);
     });
 });
-// Reemplaza a 'devuelve.php' (Simulación de sesión para Railway)
+
+// Sustituye a 'devuelve.php'
 app.get("/api/devolver_usuario", (req, res) => {
-    // Aquí podrías leer una cookie, pero por ahora devolvemos un ID de prueba 
-    // o el que necesites para que el chat no rompa
+    // Simulación de sesión (aquí puedes integrar tu sistema de login real después)
     res.json({ 
         success: true, 
         id_usuario: 1, 
-        usuario: "Admin Local" 
+        usuario: "Admin" 
     });
 });
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
+
 // ===============================
-// LÓGICA DE SOCKET.IO (Comunicación en tiempo real)
+// LÓGICA DE SOCKET.IO
 // ===============================
 io.on("connection", (socket) => {
     console.log("🟢 Usuario conectado:", socket.id);
 
-    // Identificar usuario al conectar
     socket.on("usuario_online", (data) => {
         const usuarioData = typeof data === 'object' ? data : { nombre: data, id: null };
         socket.username = usuarioData.nombre;
         socket.userId = usuarioData.id;
-        
         if (usuarioData.id) {
             usuariosOnline[usuarioData.id] = usuarioData.nombre;
         }
-        
-        console.log("Usuarios en línea:", usuariosOnline);
         io.emit("usuarios_online", usuariosOnline);
     });
 
-    // Unirse a una sala y CARGAR HISTORIAL
     socket.on("unirse_sala", (data) => {
-        const sala = (typeof data === 'object') ? data.sala : data;
-        const idUsuario = (typeof data === 'object') ? data.id_usuario : null;
-        const nombreUsuario = (typeof data === 'object') ? data.nombre_usuario : "Invitado";
-        
+        const { sala, id_usuario, nombre_usuario } = data;
         socket.join(sala);
-        socket.salaActual = sala; // Guardar la sala actual
-        if (idUsuario) socket.userId = idUsuario;
-        socket.username = nombreUsuario;
+        socket.salaActual = sala;
+        socket.userId = id_usuario;
         
-        console.log(`Usuario ${nombreUsuario} (ID: ${idUsuario}) se unió a la sala: ${sala}`);
-
-        // CONSULTA DE HISTORIAL: El campo 'usuario' ahora guarda el ID del usuario
         const query = "SELECT usuario AS id_usuario, mensaje FROM mensajes WHERE sala = ? ORDER BY fecha ASC";
         db.query(query, [sala], (err, results) => {
-            if (err) return console.error("❌ Error obteniendo historial:", err);
-            
-            // Enviamos los mensajes guardados SOLO al usuario que se acaba de unir
+            if (err) return console.error("❌ Error historial:", err);
             socket.emit("cargar_historial", results);
         });
     });
 
-    // Enviar y GUARDAR nuevo mensaje
     socket.on("nuevo_mensaje", (data) => {
         const { sala, id_usuario, nombre_usuario, mensaje } = data;
-        
-        // 1. GUARDAMOS EN LA DB: Guardamos el ID del usuario en el campo 'usuario'
         const query = "INSERT INTO mensajes (sala, usuario, mensaje) VALUES (?, ?, ?)";
         db.query(query, [sala, id_usuario, mensaje], (err) => {
-            if (err) return console.error("❌ Error al guardar mensaje:", err);
-            
-            // 2. ENVIAR A LA SALA: Enviamos solo a la sala, esto incluye a todos los miembros de la sala
+            if (err) return console.error("❌ Error guardando mensaje:", err);
             io.to(sala).emit("mensaje_recibido", data);
             
-            // 3. ENVIAR NOTIFICACIÓN AL DESTINATARIO SI NO ESTÁ EN LA SALA ACTIVA
-            const idsSala = sala.split('-').map(id => parseInt(id));
-            const idDestinatario = idsSala.find(id => id !== parseInt(id_usuario));
+            // Lógica de notificaciones
+            const ids = sala.split('-').map(Number);
+            const idDest = ids.find(id => id !== Number(id_usuario));
             
-            if (idDestinatario) {
-                // Buscar si el destinatario está conectado y en qué sala está
-                const socketsDestinatario = Array.from(io.sockets.sockets.values())
-                    .filter(s => s.userId === idDestinatario);
-                
-                socketsDestinatario.forEach(socketDest => {
-                    // Si el destinatario no está en la misma sala, enviar notificación
-                    if (socketDest.salaActual !== sala) {
-                        socketDest.emit("notificacion_nuevo_mensaje", {
-                            id_remitente: id_usuario,
-                            nombre_remitente: nombre_usuario,
-                            mensaje: mensaje,
-                            sala: sala
-                        });
-                    }
-                });
-            }
-            
-            // Opcional: Actualizar el resumen del último mensaje en las listas
-            io.emit("actualizar_ultimo_mensaje", data);
+            Array.from(io.sockets.sockets.values())
+                .filter(s => s.userId == idDest && s.salaActual !== sala)
+                .forEach(s => s.emit("notificacion_nuevo_mensaje", {
+                    id_remitente: id_usuario,
+                    nombre_remitente: nombre_usuario,
+                    mensaje: mensaje,
+                    sala: sala
+                }));
         });
     });
 
-    // Lógica de "Escribiendo..."
     socket.on("typing", (data) => {
-        // Avisa a la persona en la sala específica
         socket.to(data.sala).emit("display_typing", data);
-        
-        // Avisa globalmente para que aparezca en la lista principal de contactos
-        socket.broadcast.emit("display_typing", data);
     });
 
-    // Desconexión
     socket.on("disconnect", () => {
         if (socket.userId) {
             delete usuariosOnline[socket.userId];
             io.emit("usuarios_online", usuariosOnline);
-            console.log("🔴 Usuario desconectado:", socket.username);
         }
     });
+
 
     // Obtener historial de contactos (basado en IDs)
     socket.on("obtener_historial_contactos", (data) => {

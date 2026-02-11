@@ -22,52 +22,69 @@ const usuariosOnline = {}; // Usuarios conectados
 // ===============================
 // CONEXIÓN A LA BASE DE DATOS
 // ===============================
-const db = mysql.createPool({
-    host: process.env.MYSQLHOST,
-    user: process.env.MYSQLUSER ,
-    password: process.env.MYSQLPASSWORD ,
-    database: process.env.MYSQLDATABASE ,
-    port: process.env.MYSQLPORT 
-});
-db.query("SELECT 1", (err) => {
-    if (err) console.error("❌ MySQL no responde:", err.message);
-    else console.log("📡 MySQL listo y operativo");
+const dbConfig = {
+    host: process.env.MYSQLHOST || "mysql.railway.internal",
+    user: process.env.MYSQLUSER || "root",
+    password: process.env.MYSQLPASSWORD,
+    database: process.env.MYSQLDATABASE || "railway",
+    port: process.env.MYSQLPORT || 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000
+};
+
+let db = mysql.createPool(dbConfig);
+
+// Verificar conexión inicial sin tumbar el servidor
+db.getConnection((err, conn) => {
+    if (err) {
+        console.error("❌ Error inicial de MySQL (Revisar Variables):", err.message);
+    } else {
+        console.log("📡 MySQL listo y operativo");
+        conn.release();
+    }
 });
 
-// Mantener la conexión viva
-setInterval(() => db.query('SELECT 1'), 5000);
+// Manejo de errores del Pool para evitar "Uncaught Exception"
+db.on('error', (err) => {
+    console.error('🔥 Error en el Pool de MySQL:', err.code);
+    if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ECONNREFUSED') {
+        console.log('🔄 Intentando reconstruir el Pool...');
+        db = mysql.createPool(dbConfig);
+    }
+});
+
+// Mantener viva la conexión
+setInterval(() => {
+    db.query('SELECT 1', (err) => {
+        if (err) console.error("⚠️ Error de ping a MySQL:", err.code);
+    });
+}, 10000);
 
 // ===============================
-// SERVIR FRONTEND
+// SERVIR FRONTEND Y API
 // ===============================
-app.use(express.static(path.join(__dirname, "public"))); // carpeta public
+app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// ===============================
-// RUTAS API
-// ===============================
+// API de Usuarios con manejo de errores
 app.get("/api/usuarios", (req, res) => {
     const query = "SELECT id, nombre, apellido, correo, foto_perfil FROM usuarios";
     db.query(query, (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-
+        if (err) return res.status(500).json({ error: "Base de datos desconectada" });
         const usuarios = results.map(u => ({
             ...u,
             nombre_completo: `${u.nombre} ${u.apellido}`,
-            foto_perfil: (u.foto_perfil && u.foto_perfil !== 'default.png') ? u.foto_perfil : 'default.png'
+            foto_perfil: u.foto_perfil || 'default.png'
         }));
         res.json(usuarios);
     });
 });
-
-// Simula usuario logueado (luego reemplazar por login real)
-app.get("/api/devolver_usuario", (req, res) => {
-    res.json({ success: true, id_usuario: 1, usuario: "Admin" });
-});
-
 // ===============================
 // SOCKET.IO
 // ===============================

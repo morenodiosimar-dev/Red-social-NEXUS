@@ -18,7 +18,15 @@ const io = require("socket.io")(http, {
     }
 });
 const usuariosOnline = {}; // { id: nombre }
+const { spawn } = require('child_process');
+// Levanta un servidor PHP interno en el puerto 8000
+spawn('php', ['-S', '127.0.0.1:8000', '-t', '.']);
 
+// En tu server.js, redirige las peticiones .php al puerto 8000
+app.get('*.php', (req, res) => {
+    // Esto requiere instalar 'http-proxy-middleware'
+    // O simplemente migra la lógica a rutas de Express como en el Camino A
+});
 // ===============================
 // CONEXIÓN A LA BASE DE DATOS (Configuración para Railway)
 // ===============================
@@ -51,14 +59,22 @@ app.use(express.static(__dirname));
 // ===============================
 
 // Reemplaza a 'usuarios.php'
+// Reemplaza el fetch a usuarios.php por esta ruta en server.js
 app.get("/api/usuarios", (req, res) => {
-    const query = "SELECT id, nombre, apellido, correo, foto_perfil, CONCAT(nombre, ' ', apellido) as nombre_completo FROM usuarios";
+    const query = "SELECT id, nombre, apellido, correo, foto_perfil FROM usuarios";
     db.query(query, (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json(results);
+        
+        // Formateamos los datos igual que lo hacía tu PHP
+        const usuarios = results.map(u => ({
+            ...u,
+            nombre_completo: `${u.nombre} ${u.apellido}`,
+            foto_perfil: u.foto_perfil || 'default.png'
+        }));
+        
+        res.json(usuarios);
     });
 });
-
 // Reemplaza a 'devuelve.php' (Simulación de sesión para Railway)
 app.get("/api/devolver_usuario", (req, res) => {
     // Aquí podrías leer una cookie, pero por ahora devolvemos un ID de prueba 

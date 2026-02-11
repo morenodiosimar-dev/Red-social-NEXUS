@@ -7,7 +7,7 @@ const mysql = require("mysql2");
 const path = require("path");
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args)); // Necesario para el puente
 
-const PORT = process.env.PORT || 3000;
+
 // ===============================
 // CONFIGURACIÓN DE SOCKET.IO
 // ===============================
@@ -230,6 +230,7 @@ socket.on("usuario_online", (data) => {
 // INICIAR SERVIDOR
 // ===============================
 
+const PORT = process.env.PORT || 3000; // Railway siempre asigna el puerto en process.env.PORT
 http.listen(PORT, "0.0.0.0", () => {
     console.log(`✅ Servidor NEXUS activo en el puerto ${PORT}`);
 });

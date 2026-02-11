@@ -7,7 +7,7 @@ error_reporting(0);
 // DATOS DE RAILWAY (Copia y pega esto)
 $servername = "mysql.railway.internal"; 
 $username = "root";
-$password = "BpFRhFTLghAcqTRozKXkQyajMlYVqZCw";
+$password = "VDCVPmVJHDnmzZVPddmvGjriJbQdVHiU";
 $dbname = "railway"; // <-- En Railway tu BD se llama así
 $port = 3306;
 

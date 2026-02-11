@@ -28,7 +28,7 @@ if (!preg_match('/^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com)$/', $correo)) {
 // DATOS DE RAILWAY (Copia y pega esto)
 $servername = "mysql.railway.internal"; 
 $username = "root";
-$password = "BpFRhFTLghAcqTRozKXkQyajMlYVqZCw";
+$password = "VDCVPmVJHDnmzZVPddmvGjriJbQdVHiU";
 $dbname = "railway"; // <-- En Railway tu BD se llama así
 $port = 3306;
 

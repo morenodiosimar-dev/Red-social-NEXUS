@@ -1,11 +1,7 @@
-console.log("Servidor NEXUS: Iniciando sistema...");
-
 const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
 const mysql = require("mysql2");
-const path = require("path");
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args)); // Necesario para el puente
 const session = require("express-session");
 
 // ===============================
@@ -18,12 +14,11 @@ const io = require("socket.io")(http, {
        credentials: true
     }
 });
-const usuariosOnline = {}; // { id: nombre }
+const usuariosOnline = {}; 
 
 // ===============================
-// CONEXIÓN A LA BASE DE DATOS (Configuración para Railway)
+// CONEXIÓN A LA BASE DE DATOS (Pool para Railway)
 // ===============================
-// 2. Cambia createConnection por createPool (Es más estable en Railway)
 const db = mysql.createPool({
     host: process.env.MYSQLHOST || "localhost",
     user: process.env.MYSQLUSER || "root",
@@ -31,56 +26,45 @@ const db = mysql.createPool({
     database: process.env.MYSQLDATABASE || "railway",
     port: process.env.MYSQLPORT || 3306,
     waitForConnections: true,
-    connectionLimit: 10
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-db.connect(err => {
+// Prueba de conexión inicial para el Pool
+db.getConnection((err, connection) => {
     if (err) {
-        console.error("❌ Error conectando a la DB:", err.message);
-        return;
+        console.error("❌ Error conectando a la DB en Railway:", err.message);
+    } else {
+        console.log("📡 Pool de conexiones MySQL listo");
+        connection.release();
     }
-    console.log("📡 Conectado a la base de datos MySQL");
 });
 
-// Mantener la conexión viva (Evita el error PROTOCOL_CONNECTION_LOST)
-setInterval(() => {
-    db.query('SELECT 1');
-}, 5000);
-
+// ===============================
+// MIDDLEWARES
+// ===============================
 app.use(session({
     secret: 'te-llamo-desde-nexus',
     resave: false,
     saveUninitialized: true,
     cookie: { 
-        secure: process.env.NODE_ENV === 'production', // true si usas HTTPS en Railway
-        maxAge: 1000 * 60 * 60 * 24 // 24 horas
+        secure: process.env.NODE_ENV === 'production', 
+        maxAge: 1000 * 60 * 60 * 24 
     }
 }));
 
-io.on("connection", (socket) => {
-    console.log("🟢 Usuario conectado:", socket.id);
-// ==========================================
-// RUTAS QUE REEMPLAZAN A PHP (PUENTES API)
-// ==========================================
+// ===============================
+// RUTAS API (Fuera de io.on)
+// ===============================
 
-// REEMPLAZA TU RUTA /usuarios POR ESTA (Corregida)
 app.get('/api/usuarios', (req, res) => {
     const query = "SELECT id, nombre, apellido, correo, foto_perfil, CONCAT(nombre, ' ', apellido) as nombre_completo FROM usuarios";
-    
     db.query(query, (err, results) => {
         if (err) return res.status(500).json({ error: "Error en DB" });
-
-        const usuarios = results.map(user => ({
-            ...user,
-            nombre_completo: user.nombre_completo || `${user.nombre} ${user.apellido}`.trim(),
-            foto_perfil: user.foto_perfil || 'default.png'
-        }));
-
-        res.json(usuarios);
+        res.json(results);
     });
 });
 
-// ESTE ES TU NUEVO "devuelve.php" (Sin fetch, directo de la sesión de Node)
 app.get("/api/devolver_usuario", (req, res) => {
     if (req.session && req.session.userId) {
         res.json({
@@ -89,102 +73,86 @@ app.get("/api/devolver_usuario", (req, res) => {
             id_usuario: req.session.userId
         });
     } else {
-        res.json({ 
-            success: false, 
-            message: "No hay sesión activa en el servidor de Node" 
-        });
+        res.json({ success: false, message: "No hay sesión en Node" });
     }
 });
 
-// Identificar usuario
-socket.on("usuario_online", (data) => {
-    const usuarioData = typeof data === 'object' ? data : { nombre: data, id: null };
-    socket.username = usuarioData.nombre;
-    socket.userId = usuarioData.id;
-    if (usuarioData.id) {
-        usuariosOnline[usuarioData.id] = usuarioData.nombre;
+// RUTA PUENTE: Para recibir datos del login externo
+app.get("/api/set_session_externa", (req, res) => {
+    const { id, nombre } = req.query;
+    if (id && nombre) {
+        req.session.userId = id;
+        req.session.nombreCompleto = nombre;
+        return res.send(`
+            <script>
+                console.log("Sesión sincronizada");
+                window.location.href = "/"; 
+            </script>
+        `);
     }
-    io.emit("usuarios_online", usuariosOnline);
+    res.redirect("/");
 });
 
+// ===============================
+// LÓGICA DE SOCKET.IO
+// ===============================
+io.on("connection", (socket) => {
+    console.log("🟢 Usuario conectado:", socket.id);
 
-    // Unirse a una sala y CARGAR HISTORIAL
+    socket.on("usuario_online", (data) => {
+        const usuarioData = typeof data === 'object' ? data : { nombre: data, id: null };
+        socket.username = usuarioData.nombre;
+        socket.userId = usuarioData.id;
+        if (usuarioData.id) {
+            usuariosOnline[usuarioData.id] = usuarioData.nombre;
+        }
+        io.emit("usuarios_online", usuariosOnline);
+    });
+
     socket.on("unirse_sala", (data) => {
-        const sala = (typeof data === 'object') ? data.sala : data;
-        const idUsuario = (typeof data === 'object') ? data.id_usuario : null;
-        const nombreUsuario = (typeof data === 'object') ? data.nombre_usuario : "Invitado";
-        
+        const { sala, id_usuario, nombre_usuario } = data;
         socket.join(sala);
-        socket.salaActual = sala; // Guardar la sala actual
-        if (idUsuario) socket.userId = idUsuario;
-        socket.username = nombreUsuario;
-        
-        console.log(`Usuario ${nombreUsuario} (ID: ${idUsuario}) se unió a la sala: ${sala}`);
+        socket.salaActual = sala;
+        socket.userId = id_usuario;
+        socket.username = nombre_usuario;
 
-        // CONSULTA DE HISTORIAL: El campo 'usuario' ahora guarda el ID del usuario
         const query = "SELECT usuario AS id_usuario, mensaje FROM mensajes WHERE sala = ? ORDER BY fecha ASC";
         db.query(query, [sala], (err, results) => {
-            if (err) return console.error("❌ Error obteniendo historial:", err);
-            
-            // Enviamos los mensajes guardados SOLO al usuario que se acaba de unir
+            if (err) return console.error(err);
             socket.emit("cargar_historial", results);
         });
     });
 
-    // Enviar y GUARDAR nuevo mensaje
     socket.on("nuevo_mensaje", (data) => {
         const { sala, id_usuario, nombre_usuario, mensaje } = data;
-        
-        // 1. GUARDAMOS EN LA DB: Guardamos el ID del usuario en el campo 'usuario'
         const query = "INSERT INTO mensajes (sala, usuario, mensaje) VALUES (?, ?, ?)";
         db.query(query, [sala, id_usuario, mensaje], (err) => {
-            if (err) return console.error("❌ Error al guardar mensaje:", err);
-            
-            // 2. ENVIAR A LA SALA: Enviamos solo a la sala, esto incluye a todos los miembros de la sala
+            if (err) return console.error(err);
             io.to(sala).emit("mensaje_recibido", data);
-            
-            // 3. ENVIAR NOTIFICACIÓN AL DESTINATARIO SI NO ESTÁ EN LA SALA ACTIVA
+
+            // Lógica de notificaciones
             const idsSala = sala.split('-').map(id => parseInt(id));
             const idDestinatario = idsSala.find(id => id !== parseInt(id_usuario));
             
             if (idDestinatario) {
-                // Buscar si el destinatario está conectado y en qué sala está
-                const socketsDestinatario = Array.from(io.sockets.sockets.values())
-                    .filter(s => s.userId === idDestinatario);
-                
-                socketsDestinatario.forEach(socketDest => {
-                    // Si el destinatario no está en la misma sala, enviar notificación
-                    if (socketDest.salaActual !== sala) {
+                Array.from(io.sockets.sockets.values())
+                    .filter(s => s.userId == idDestinatario && s.salaActual !== sala)
+                    .forEach(socketDest => {
                         socketDest.emit("notificacion_nuevo_mensaje", {
                             id_remitente: id_usuario,
                             nombre_remitente: nombre_usuario,
                             mensaje: mensaje,
                             sala: sala
                         });
-                    }
-                });
+                    });
             }
-            
-            // Opcional: Actualizar el resumen del último mensaje en las listas
-            io.emit("actualizar_ultimo_mensaje", data);
         });
     });
 
-    // Lógica de "Escribiendo..."
-    socket.on("typing", (data) => {
-        // Avisa a la persona en la sala específica
-        socket.to(data.sala).emit("display_typing", data);
-        
-        // Avisa globalmente para que aparezca en la lista principal de contactos
-        socket.broadcast.emit("display_typing", data);
-    });
-
-    // Desconexión
     socket.on("disconnect", () => {
         if (socket.userId) {
             delete usuariosOnline[socket.userId];
             io.emit("usuarios_online", usuariosOnline);
-            console.log("🔴 Usuario desconectado:", socket.username);
         }
     });
 

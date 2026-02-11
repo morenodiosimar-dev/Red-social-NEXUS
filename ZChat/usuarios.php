@@ -4,13 +4,12 @@ $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowed_origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://tu-app-en-railway.up.railway.app" // Reemplaza con tu URL real de Railway después
+    "https://red-social-nexus-production.up.railway.app/;" /// Reemplaza con tu URL real de Railway después
 ];
 
 if (in_array($origin, $allowed_origins)) {
     header("Access-Control-Allow-Origin: $origin");
-}
-header("Access-Control-Allow-Credentials: true");
+}s
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header('Content-Type: application/json; charset=utf-8');

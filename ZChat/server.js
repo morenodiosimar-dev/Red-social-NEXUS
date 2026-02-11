@@ -23,13 +23,19 @@ const usuariosOnline = {};
 // ===============================
 // CONEXIÓN A LA BASE DE DATOS
 // ===============================
-const db = mysql.createConnection({
-    host: process.env.MYSQLHOST || "localhost",
-    user: process.env.MYSQLUSER || "root",
-    password: process.env.MYSQLPASSWORD || "",
-    database: process.env.MYSQLDATABASE || "railway",
-    port: process.env.MYSQLPORT || 3306
+const mysql = require("mysql2/promise");
+
+const db = mysql.createPool({
+  host: process.env.MYSQLHOST,
+  user: process.env.MYSQLUSER,
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQLDATABASE,
+  port: process.env.MYSQLPORT,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
+
 
 db.connect(err => {
     if (err) {
@@ -41,12 +47,8 @@ db.connect(err => {
 
 setInterval(() => { db.query('SELECT 1'); }, 5000);
 
-// Servir archivos estáticos (HTML, JS, CSS, IMG)
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, "public")));
 
-// ===============================
-// API ENDPOINTS (Reemplazan a los archivos .php)
-// ===============================
 
 // Sustituye a 'usuarios.php'
 app.get("/api/usuarios", (req, res) => {
@@ -190,10 +192,18 @@ io.on("connection", (socket) => {
     });
 });
 
-// ===============================
+
 // INICIAR SERVIDOR
 // ===============================
 
 http.listen(PORT, "0.0.0.0", () => {
     console.log(`✅ Servidor NEXUS activo en el puerto ${PORT}`);
+});
+
+process.on("uncaughtException", err => {
+    console.error("🔥 Uncaught Exception:", err);
+});
+
+process.on("unhandledRejection", err => {
+    console.error("🔥 Unhandled Rejection:", err);
 });

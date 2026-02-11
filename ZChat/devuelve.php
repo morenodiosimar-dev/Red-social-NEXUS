@@ -1,7 +1,6 @@
 <?php
 // 1. CONFIGURACIÓN DE CORS LIBRE PARA PRODUCCIÓN
 header("Access-Control-Allow-Origin: *"); 
-header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 header('Content-Type: application/json; charset=utf-8');
@@ -11,7 +10,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 }
 
 // 2. INICIAR SESIÓN
-session_start();
 
 // 3. VARIABLES DE ENTORNO PARA RAILWAY
 $host = getenv('MYSQLHOST') ?: "127.0.0.1";

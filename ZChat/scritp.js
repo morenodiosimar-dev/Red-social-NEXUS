@@ -3,11 +3,8 @@ console.log("NEXUS Chat: Sistema cargado");
 const IS_LOCAL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 const SOCKET_URL = IS_LOCAL ? "http://localhost:3000" : window.location.origin;
 
-const socket = io(SOCKET_URL, {
-    withCredentials: true,
-    transports: ['websocket', 'polling']
-});
 
+let socket;
 let salaActual = null;
 let usuarioActual = null;
 let idUsuarioActual = null;
@@ -23,16 +20,18 @@ if (Notification.permission !== "granted" && Notification.permission !== "denied
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    fetch(`/api/devolver_usuario`,{ 
-        method: 'GET',
-        credentials: 'include' // Esto permite que PHP reconozca quién está logueado
-    })
+    fetch("/api/devolver_usuario")
         .then(res => res.json())
         .then(data => {
             usuarioActual = data.usuario || "Invitado-" + Math.floor(Math.random() * 1000);
-            idUsuarioActual = data.id_usuario || null;
+            idUsuarioActual = data.id_usuario ? parseInt(data.id_usuario) : null;
+            socket = io(SOCKET_URL, {
+                transports: ['websocket']
+            });        
             socket.emit("usuario_online", { nombre: usuarioActual, id: idUsuarioActual });
+            registrarEventosSocket();
             iniciarChat();
+            
         })
         .catch(err => {
             console.error("Error identificando usuario:", err);
@@ -45,6 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // 2. ESCUCHADORES DE SOCKET (Movidos fuera para que funcionen siempre)
 
+function registrarEventosSocket() {
+
 socket.on("usuarios_online", (lista) => {
     usuariosOnline = lista; // Ahora es un objeto { id: nombre }
     actualizarEstados();
@@ -56,7 +57,11 @@ socket.on("notificacion_nuevo_mensaje", (data) => {
     
     // Enviar notificación del navegador si la pestaña no está activa o el usuario no está en el chat
     if (document.hidden || salaActual !== sala) {
-        enviarNotificacionSistema(nombre_remitente, mensaje);
+        crearNotificacion(
+            nombre_remitente,
+            mensaje,
+            id_remitente
+        );
     }
     
     // Marcar mensaje como no leído en la lista
@@ -67,14 +72,16 @@ socket.on("notificacion_nuevo_mensaje", (data) => {
 });
 
 // Detectar cuando la pestaña gana foco para limpiar notificaciones
-document.addEventListener('visibilitychange', () => {
+document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
-        // Limpiar todas las notificaciones cuando el usuario vuelve a la pestaña
-        if ('clear' in Notification) {
-            Notification.clear();
-        }
+        document.querySelectorAll(".chat-item.no-leido").forEach(item => {
+            item.classList.remove("no-leido");
+            const badge = item.querySelector(".badge");
+            if (badge) badge.remove();
+        });
     }
 });
+
 
 socket.on("display_typing", (data) => {
     const { id_usuario, sala } = data;
@@ -138,6 +145,7 @@ socket.on("cargar_historial", (mensajes) => {
     });
 });
 
+}
 // 3. FUNCIONES DE APOYO (Tal cual las tenías)
 
 function agregarMensaje(texto, lado) {
@@ -170,14 +178,15 @@ function actualizarEstados() {
 
     // Header
     if (salaActual) {
-        const idsSala = salaActual.split("-");
-        const otroId = idsSala.find(id => parseInt(id) !== idUsuarioActual);
-        const estadoChat = document.getElementById("estadoChat");
-        if (estadoChat) {
-            const estaEnLinea = usuariosOnline[otroId] !== undefined;
-            estadoChat.textContent = estaEnLinea ? "En línea" : "Desconectado";
-            estadoChat.style.color = estaEnLinea ? "#00c853" : "#9e9e9e";
-        }
+        const idsSala = salaActual.split("-").map(id => parseInt(id));
+const otroId = idsSala.find(id => id !== idUsuarioActual);
+
+const estadoChat = document.getElementById("estadoChat");
+if (estadoChat && otroId) {
+    const estaEnLinea = usuariosOnline[otroId] !== undefined;
+    estadoChat.textContent = estaEnLinea ? "En línea" : "Desconectado";
+    estadoChat.style.color = estaEnLinea ? "#00c853" : "#9e9e9e";
+}
     }
 }
 
@@ -194,39 +203,33 @@ function enviarNotificacionSistema(usuario, mensaje) {
     }
 }
 
-function crearNotificacion(usuario, mensaje) {
-    const noti = new Notification(`Nuevo mensaje de ${usuario}`, {
-        body: mensaje,
-     icon: "./img/default.png",
-        badge: "http://localhost/Chat/img/default.png",
-        tag: 'nexus-chat', // Para agrupar notificaciones
-        requireInteraction: false,
-        silent: false
-    });
-    
-    // Hacer sonido de notificación
-    try {
-        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
-        audio.volume = 0.3;
-        audio.play().catch(() => {}); // Ignorar errores de autoplay
-    } catch (e) {
-        console.log('No se pudo reproducir sonido de notificación');
+function crearNotificacion(usuario, mensaje, idRemitente) {
+
+    // Notificación del navegador
+    if (Notification.permission === "granted") {
+        new Notification(usuario, {
+            body: mensaje,
+            icon: "./img/default.png",
+            badge: "./img/default.png"
+        });
     }
-    
-    // Al hacer clic, enfocar la ventana y abrir el chat
-    noti.onclick = () => {
-        window.focus();
-        // Buscar y abrir el chat del remitente si existe
-        const chatItem = document.querySelector(`.chat-item[data-id="${usuario}"]`);
-        if (chatItem) {
-            chatItem.click();
+
+    // Marcar el chat como no leído
+    const chatItem = document.querySelector(`.chat-item[data-id="${idRemitente}"]`);
+
+    if (chatItem) {
+        chatItem.classList.add("no-leido");
+
+        let badge = chatItem.querySelector(".badge");
+        if (!badge) {
+            badge = document.createElement("span");
+            badge.className = "badge";
+            badge.textContent = "●";
+            chatItem.appendChild(badge);
         }
-        noti.close();
-    };
-    
-    // Auto-cerrar después de 5 segundos
-    setTimeout(() => noti.close(), 5000);
+    }
 }
+
 
 function actualizarUltimoMensajeEnLista(idUsuario, mensaje) {
     // Buscar en la lista principal

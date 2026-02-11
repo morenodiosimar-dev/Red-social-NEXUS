@@ -204,6 +204,6 @@ io.on("connection", (socket) => {
 // INICIAR SERVIDOR
 // ===============================
 
-http.listen(PORT, () => {
-    console.log(`✅ Servidor NEXUS activo en http://localhost:${PORT}`);
+http.listen(PORT, "0.0.0.0", () => {
+    console.log(`✅ Servidor NEXUS activo en el puerto ${PORT}`);
 });

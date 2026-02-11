@@ -192,9 +192,10 @@ io.on("connection", (socket) => {
 // INICIAR SERVIDOR
 // ===============================
 
-http.listen(PORT, "0.0.0.0", () => {
+http.listen(PORT, () => {
     console.log(`✅ Servidor NEXUS activo en el puerto ${PORT}`);
 });
+
 
 process.on("uncaughtException", err => {
     console.error("🔥 Uncaught Exception:", err);

@@ -14,7 +14,7 @@ error_log("Debug seleccionar_interes.php - user_id final: " . ($user_id ?? 'null
 
 if (!$user_id) {
     error_log("Error: No hay user_id, redirigiendo a index.html");
-    header("Location: index.html");
+    header("Location: index.php");
     exit();
 }
 
@@ -25,7 +25,7 @@ $stmt_user->execute();
 $result_user = $stmt_user->get_result();
 
 if ($result_user->num_rows === 0) {
-    header("Location: index.html");
+    header("Location: index.php");
     exit();
 }
 

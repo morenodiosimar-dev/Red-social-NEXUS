@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['usuario_id'])) {
-    header("Location: index.html");
+    header("Location: index.php");
     exit;
 }
 
@@ -70,16 +70,16 @@ if ($conn->connect_error) die("Error de conexión: " . $conn->connect_error);
                 <h3 class="text-md font-bold mb-2">Historial de Reacciones</h3>
 
                 <!-- Filtro de fechas -->
-                <div class="mb-4 flex gap-2 items-center">
-                    <input type="text" id="fecha-inicio" class="border rounded px-2 py-1" placeholder="Desde">
-                    <input type="text" id="fecha-fin" class="border rounded px-2 py-1" placeholder="Hasta">
-                    <button id="buscarReacciones" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Buscar</button>
+                <div class="mb-4 flex flex-col md:flex-row gap-2 items-center">
+                    <input type="text" id="fecha-inicio" class="border rounded px-2 py-1 w-full md:w-auto" placeholder="Desde">
+                    <input type="text" id="fecha-fin" class="border rounded px-2 py-1 w-full md:w-auto" placeholder="Hasta">
+                    <button id="buscarReacciones" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 w-full md:w-auto">Buscar</button>
                 </div>
 
                 <!-- Botones de filtro -->
-                <div class="mb-4 flex gap-2">
-                    <button id="misReacciones" class="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300">Mis reacciones</button>
-                    <button id="reaccionesAMi" class="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300">Me han Reaccionado</button>
+                <div class="mb-4 flex flex-col md:flex-row gap-2">
+                    <button id="misReacciones" class="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300 w-full md:w-auto">Mis reacciones</button>
+                    <button id="reaccionesAMi" class="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300 w-full md:w-auto">Me han Reaccionado</button>
                 </div>
 
                 <!-- Lista -->
@@ -93,15 +93,15 @@ if ($conn->connect_error) die("Error de conexión: " . $conn->connect_error);
 <div id="comentarios-section" class="mt-4 hidden">
     <h3 class="text-md font-bold mb-2">Historial de Comentarios</h3>
 
-    <div class="mb-4 flex gap-2 items-center">
-        <input type="text" id="coment-fecha-inicio" class="border rounded px-2 py-1" placeholder="Desde">
-        <input type="text" id="coment-fecha-fin" class="border rounded px-2 py-1" placeholder="Hasta">
-        <button id="buscarComentarios" class="bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600">Buscar</button>
+    <div class="mb-4 flex flex-col md:flex-row gap-2 items-center">
+        <input type="text" id="coment-fecha-inicio" class="border rounded px-2 py-1 w-full md:w-auto" placeholder="Desde">
+        <input type="text" id="coment-fecha-fin" class="border rounded px-2 py-1 w-full md:w-auto" placeholder="Hasta">
+        <button id="buscarComentarios" class="bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600 w-full md:w-auto">Buscar</button>
     </div>
 
-    <div class="mb-4 flex gap-2">
-        <button id="misComentarios" class="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300">Mis comentarios</button>
-        <button id="comentariosAMi" class="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300">Me han comentado</button>
+    <div class="mb-4 flex flex-col md:flex-row gap-2">
+        <button id="misComentarios" class="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300 w-full md:w-auto">Mis comentarios</button>
+        <button id="comentariosAMi" class="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300 w-full md:w-auto">Me han comentado</button>
     </div>
 
     <div id="lista-comentarios" class="border rounded p-2 max-h-96 overflow-y-auto text-sm text-gray-700">

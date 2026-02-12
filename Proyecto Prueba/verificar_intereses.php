@@ -206,7 +206,7 @@ if ($check_user_interests->num_rows == 0) {
 }
 
 echo "<hr>";
-echo "<p><a href='index.html' style='background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Volver al inicio</a></p>";
+echo "<p><a href='index.php' style='background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Volver al inicio</a></p>";
 
 if ($data_count > 0) {
     echo "<p><a href='seleccionar_interes.php?user_id=1' style='background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Probar selección de intereses</a></p>";

@@ -32,6 +32,8 @@ console.log("MYSQLPORT:", process.env.MYSQLPORT ? "✅ Configurado" : "❌ NO co
 
 const dbConfig = {
     host: process.env.MYSQLHOST,
+    user: process.env.MYSQLUSER,
+    password: process.env.MYSQLPASSWORD,
     database: process.env.MYSQLDATABASE || 'railway', // Usa 'railway' por defecto si no está configurado
     port: process.env.MYSQLPORT || 3306,
     waitForConnections: true,

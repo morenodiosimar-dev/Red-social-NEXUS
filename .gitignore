@@ -1,0 +1,23 @@
+# Archives directory (backup of old projects)
+/archives/
+
+# Laravel
+/laravel_chat/vendor/
+/laravel_chat/node_modules/
+/laravel_chat/.env
+/laravel_chat/storage/*.key
+/laravel_chat/storage/logs/*
+!/laravel_chat/storage/logs/.gitkeep
+/laravel_chat/bootstrap/cache/*
+!/laravel_chat/bootstrap/cache/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

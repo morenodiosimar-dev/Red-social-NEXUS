@@ -41,9 +41,7 @@ const dbConfig = {
     queueLimit: 0,
     enableKeepAlive: true,
     keepAliveInitialDelay: 10000,
-    connectTimeout: 60000, // 60 segundos para conectar
-    acquireTimeout: 60000, // 60 segundos para adquirir conexión
-    timeout: 60000, // 60 segundos timeout general
+    connectTimeout: 60000,
     ssl: (process.env.MYSQLHOST && !process.env.MYSQLHOST.includes('internal'))
         ? { rejectUnauthorized: false }
         : false
@@ -56,14 +54,15 @@ if (process.env.MYSQLHOST && process.env.MYSQLHOST.includes('internal')) {
 
 let db = mysql.createPool(dbConfig);
 
-// Verificar conexión inicial SIN tumbar el servidor
 db.getConnection((err, conn) => {
     if (err) {
-        console.error("❌ Error inicial de MySQL (El servidor seguirá funcionando):", err.message);
-        console.error("Código de error:", err.code);
-        console.error("⚠️ IMPORTANTE: Verifica las variables de entorno en Railway");
+        console.log("------------------------------------------");
+        console.error("❌ ERROR DE CONEXIÓN A MYSQL:");
+        console.error(`Mensaje: ${err.message}`);
+        console.error(`Código: ${err.code}`);
+        console.log("------------------------------------------");
     } else {
-        console.log("📡 MySQL listo y operativo");
+        console.log("📡 [MySQL] Conexión establecida con éxito");
         conn.release();
     }
 });

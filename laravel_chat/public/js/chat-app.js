@@ -263,6 +263,25 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (e.key === 'Enter') sendMessage();
     });
 
+    // 8. Logout
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+        if (!confirm('¿Estás seguro de cerrar sesión del chat?')) return;
+
+        try {
+            await fetch('/chat/logout', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+            // Redirigir al origen si existe, o recargar
+            window.location.href = '/';
+        } catch (error) {
+            console.error("Error logout:", error);
+            alert("Error al cerrar sesión");
+        }
+    });
+
     // Iniciar
     login();
 });

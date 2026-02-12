@@ -212,4 +212,16 @@ class ChatController extends Controller
 
         return $_SESSION['id_usuario'] ?? null;
     }
+
+    public function logout()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        session_destroy();
+        Auth::logout();
+
+        return response()->json(['success' => true]);
+    }
 }

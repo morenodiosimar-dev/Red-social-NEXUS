@@ -11,7 +11,7 @@ $nombre_completo = ($_SESSION['nombre'] ?? 'Usuario') . " " . ($_SESSION['apelli
 $host = getenv('MYSQLHOST') ?: "127.0.0.1";
 $user = getenv('MYSQLUSER') ?: "root";
 $pass = getenv('MYSQLPASSWORD') ?: "";
-$db   = getenv('MYSQLDATABASE') ?: "nexus_db";
+$db   = getenv('MYSQLDATABASE') ?: "railway";
 $port = getenv('MYSQLPORT') ?: 3306;
 
 $conn = new mysqli($host, $user, $pass, $db, $port);

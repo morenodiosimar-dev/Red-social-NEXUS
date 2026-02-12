@@ -1,0 +1,12 @@
+[phases.setup]
+packages = ["composer", "php", "php-cli", "php-intl", "php-gd", "php-mbstring", "php-xml", "php-curl"]
+
+[phases.build]
+cmds = [
+  "cd 'proyecto nore/laravel_chat' && composer install --no-dev --optimize-autoloader",
+  "cd 'proyecto nore/laravel_chat' && php artisan config:cache",
+  "cd 'proyecto nore/laravel_chat' && php artisan route:cache"
+]
+
+[start]
+command = "cd 'proyecto nore/laravel_chat' && php -S 0.0.0.0:$PORT -t public"

@@ -1,0 +1,1 @@
+web: cd "proyecto nore/laravel_chat" && php -S 0.0.0.0:$PORT -t public

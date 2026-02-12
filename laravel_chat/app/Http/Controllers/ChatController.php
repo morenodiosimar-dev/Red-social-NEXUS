@@ -36,7 +36,7 @@ class ChatController extends Controller
             // Verificar si el usuario está autenticado en el sistema PHP existente
             if (isset($_SESSION['usuario_id']) && isset($_SESSION['nombre'])) {
                 $usuario = User::find($_SESSION['usuario_id']);
-                
+
                 if ($usuario) {
                     // Marcar usuario como en línea
                     $usuario->markAsOnline();
@@ -64,18 +64,6 @@ class ChatController extends Controller
                 'error' => 'Error obteniendo datos del usuario: ' . $e->getMessage()
             ], 500);
         }
-    }
-            ->where('id', $id)
-            ->first();
-
-        if (!$usuario) {
-            return response()->json(['error' => 'Usuario no encontrado'], 404);
-        }
-
-        return view('chat.historial_personal', [
-            'usuario' => $usuario,
-            'id_usuario_actual' => $this->getCurrentUserId()
-        ]);
     }
 
     public function sendMessage(Request $request)
@@ -108,7 +96,7 @@ class ChatController extends Controller
     public function getContacts()
     {
         $userId = $this->getCurrentUserId();
-        
+
         if (!$userId) {
             return response()->json(['error' => 'Usuario no autenticado'], 401);
         }
@@ -125,7 +113,7 @@ class ChatController extends Controller
         foreach ($salas as $sala) {
             $partes = explode('-', $sala->sala);
             foreach ($partes as $id) {
-                $id = (int)$id;
+                $id = (int) $id;
                 if ($id !== $userId && !in_array($id, $contactosIds)) {
                     $contactosIds[] = $id;
                 }
@@ -169,7 +157,7 @@ class ChatController extends Controller
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        
+
         return $_SESSION['id_usuario'] ?? null;
     }
 }

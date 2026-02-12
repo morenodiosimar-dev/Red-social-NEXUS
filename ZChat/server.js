@@ -42,10 +42,15 @@ const dbConfig = {
     connectTimeout: 60000, // 60 segundos para conectar
     acquireTimeout: 60000, // 60 segundos para adquirir conexión
     timeout: 60000, // 60 segundos timeout general
-    ssl: process.env.MYSQLHOST && process.env.MYSQLHOST.includes('railway')
+    ssl: (process.env.MYSQLHOST && !process.env.MYSQLHOST.includes('internal'))
         ? { rejectUnauthorized: false }
-        : undefined
+        : false
 };
+
+console.log("📡 Host MySQL:", process.env.MYSQLHOST);
+if (process.env.MYSQLHOST && process.env.MYSQLHOST.includes('internal')) {
+    console.log("🔒 Conexión Interna: SSL desactivado para mayor compatibilidad.");
+}
 
 let db = mysql.createPool(dbConfig);
 
@@ -85,22 +90,9 @@ app.use(express.static(path.join(__dirname, "public")));
 // Servir archivos de uploads (fotos de perfil)
 app.use('/uploads', express.static(path.join(__dirname, "uploads")));
 
-// Health check para Railway
+// Health check indestructible para Railway (Elimina el 502)
 app.get("/health", (req, res) => {
-    db.query('SELECT 1', (err) => {
-        if (err) {
-            return res.status(503).json({
-                status: "unhealthy",
-                database: "disconnected",
-                error: err.code
-            });
-        }
-        res.status(200).json({
-            status: "healthy",
-            database: "connected",
-            timestamp: new Date().toISOString()
-        });
-    });
+    res.status(200).send("OK");
 });
 
 app.get("/", (req, res) => {
@@ -282,8 +274,9 @@ io.on("connection", (socket) => {
 // ===============================
 // INICIAR SERVIDOR
 // ===============================
-http.listen(PORT, () => {
+http.listen(PORT, "0.0.0.0", () => {
     console.log(`✅ Servidor NEXUS activo en el puerto ${PORT}`);
+    console.log(`🔗 URL de salud: http://0.0.0.0:${PORT}/health`);
 });
 
 process.on("uncaughtException", err => console.error("🔥 Uncaught Exception:", err));

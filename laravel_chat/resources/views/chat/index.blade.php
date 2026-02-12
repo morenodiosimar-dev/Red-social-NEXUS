@@ -21,8 +21,13 @@
 
     <!-- MÓDULO 1: LISTA DE CHATS -->
     <div id="modulo-lista-chats">
-        <div class="titulo">
-            NEXUS Chat
+        <div class="header-container" style="position: relative; width: 100%;">
+            <a href="https://proyecto-prueba.com/cuenta" class="devolver" title="Volver">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="titulo">
+                NEXUS Chat
+            </div>
         </div>
 
         <div class="top-bar">

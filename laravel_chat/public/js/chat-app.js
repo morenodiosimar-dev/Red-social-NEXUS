@@ -132,10 +132,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                 `;
             } else {
                 el.innerHTML = `
-                    <img src="${user.foto_perfil || '../assets/default-avatar.png'}" class="foto-chat">
-                    <div class="info-chat">
-                        <div class="nombre-chat" style="font-weight: bold;">${user.nombre} ${user.apellido}</div>
-                        <p class="ultimo-mensaje" style="color: grey; font-size: 14px;">${user.last_message || 'Toca para chatear'}</p>
+                    <img src="${user.foto_perfil || '../assets/default-avatar.png'}" class="chat-photo">
+                    <div class="chat-info">
+                        <div class="chat-name">${user.nombre} ${user.apellido}</div>
+                        <p class="chat-last">${user.last_message || 'Toca para chatear'}</p>
                     </div>
                 `;
             }

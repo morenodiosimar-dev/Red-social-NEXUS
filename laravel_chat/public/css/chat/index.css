@@ -16,6 +16,23 @@
     font-family: 'Segoe UI', Roboto, sans-serif;
 }
 
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.bloque {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* ocupa toda la altura */
+    width: 100%;
+    /* ocupa todo el ancho */
+    background: #f9f9f9;
+}
 
 /* Contenedor de cada sección (Lista y Chat) */
 .pantalla {
@@ -24,7 +41,6 @@
     width: 100%;
     flex-direction: column;
     overflow: hidden;
-
 }
 
 @keyframes fade {
@@ -58,7 +74,6 @@
     max-width: 500px;
     margin: 20px auto;
     /* Centra el buscador */
-
 }
 
 .busqueda {
@@ -97,14 +112,8 @@
     /* horizontal */
     align-items: center;
     /* vertical */
-
-}
-
-
-.titulo {
     text-align: center;
     line-height: 70px;
-    /* igual a la altura para centrar vertical */
 }
 
 .busqueda:focus {
@@ -135,24 +144,80 @@
 .chat-item {
     display: flex;
     align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #f3f4f6;
+    border-radius: 10px;
     cursor: pointer;
-    transition: 0.2s;
+    transition: background 0.2s;
 }
 
 .chat-item:hover {
-    background: #f3d2e6;
-    transform: scale(1.01);
+    background: #e0e7ff;
 }
 
-.foto-chat {
+.foto-chat,
+.chat-photo {
     width: 60px;
     height: 60px;
     border-radius: 50%;
     margin-right: 15px;
     border: 2px solid white;
     object-fit: cover;
+}
+
+/* Helper styles from user request */
+.devolver {
+    padding: 10px;
+    border-radius: 25px;
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    display: flex;
+    justify-content: left;
+    font-size: 30px;
+    color: white;
+    cursor: pointer;
+    z-index: 100;
+}
+
+.titulo-historial {
+    background: linear-gradient(45deg, #ff00cc, #3333ff);
+    color: white;
+    padding: 16px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#status-debug {
+    padding: 8px;
+    text-align: center;
+    font-size: 15px;
+    color: #580650;
+}
+
+#lista-historial {
+    flex: 1;
+    /* ocupa todo el espacio disponible */
+    overflow-y: auto;
+    /* scroll si hay muchos chats */
+    padding: 12px;
+    background: #fff;
+}
+
+.chat-info {
+    flex: 1;
+}
+
+.chat-name {
+    font-weight: bold;
+    color: #111;
+}
+
+.chat-last {
+    font-size: 13px;
+    color: #555;
 }
 
 /* =========================================

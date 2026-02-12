@@ -1,0 +1,193 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        :root {
+            
+            --gradient: linear-gradient(45deg, #ff00cc, #3333ff);
+            --header-height: 80px; 
+        }
+        
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            padding-top: var(--header-height);
+            background-color: white;
+            min-height: 100vh;
+        }
+
+        .busqueda {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .centro-busqueda {
+            width: 100%;
+            max-width: 600px; 
+            padding: 20px 1rem; 
+            display: flex;
+            justify-content: center;
+        }
+        
+        .superior {
+            background-color: white;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 20;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+            height: var(--header-height); 
+        }
+        
+        .nombre-red {
+            font-size: 2rem;
+            font-weight: bold;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .buscar-info {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .buscar-info input {
+            border: 3px solid transparent;
+            border-image: var(--gradient) 1; 
+            
+            border-radius: 10px;
+            outline: none;
+            width: 100%;
+            height: 50px; 
+            font-size: 16px;
+            color: black;
+            font-weight: 500;
+            background-color: rgb(245, 230, 255);
+            padding: 10px 55px 10px 20px; 
+            box-sizing: border-box;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .buscar-info input:focus {
+            box-shadow: 0 0 10px rgba(136, 0, 255, 0.2);
+        }
+        
+        .icon-buscar {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: #3333ff; 
+            pointer-events: none; 
+        }
+
+        .iconos-inferiores {
+            width: 100%;
+            height: 70px; 
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            padding: 10px 20px;
+            z-index: 20;
+        }
+
+        .icon-gradient {
+            background: var(--gradient);
+            border-radius: 50%; 
+            padding: 15px; 
+            font-size: 28px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .icon-gradient:hover {
+            transform: scale(1.1);
+        }
+ 
+/* Contenedor principal: Alinea todo en una fila horizontal */
+.contenedor-horizontal-busqueda {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background-color: white;
+    border-bottom: 1px solid #eee;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Agrupa foto y texto a la izquierda */
+.foto-y-datos {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+/* Contenedor fijo de la imagen o icono */
+.mini-avatar {
+    width: 45px; /* Tamaño pequeño y constante */
+    height: 45px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #f0f0f0;
+}
+
+.mini-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Recorta la foto para que siempre sea un círculo perfecto */
+}
+
+.avatar-vacio {
+    width: 100%;
+    height: 100%;
+    background-color: #e9ecef; /* Fondo gris suave */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #adb5bd;
+}
+
+.avatar-vacio ion-icon {
+    font-size: 24px;
+}
+
+/* El botón Ver con el degradado Nexus */
+.btn-ver-nexus {
+    background: linear-gradient(45deg, #ff00cc, #3333ff);
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}

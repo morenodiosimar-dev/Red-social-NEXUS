@@ -114,7 +114,7 @@ app.get("/health", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
+    res.status(200).sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // API para obtener el usuario actual (desde query params)

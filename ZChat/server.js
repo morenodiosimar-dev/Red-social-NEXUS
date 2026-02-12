@@ -27,14 +27,12 @@ const usuariosOnline = {}; // Usuarios conectados
 console.log("🔍 Verificando variables de entorno MySQL:");
 console.log("MYSQLHOST:", process.env.MYSQLHOST ? "✅ Configurado" : "❌ NO configurado");
 console.log("MYSQLUSER:", process.env.MYSQLUSER ? "✅ Configurado" : "❌ NO configurado");
-console.log("MYSQLDATABASE:", process.env.MYSQLDATABASE ? "✅ Configurado" : "❌ NO configurado");
+console.log("MYSQLDATABASE:", (process.env.MYSQLDATABASE || 'railway') ? "✅ Configurado (o usando default 'railway')" : "❌ NO configurado");
 console.log("MYSQLPORT:", process.env.MYSQLPORT ? "✅ Configurado" : "❌ NO configurado");
 
 const dbConfig = {
     host: process.env.MYSQLHOST,
-    user: process.env.MYSQLUSER,
-    password: process.env.MYSQLPASSWORD,
-    database: process.env.MYSQLDATABASE,
+    database: process.env.MYSQLDATABASE || 'railway', // Usa 'railway' por defecto si no está configurado
     port: process.env.MYSQLPORT || 3306,
     waitForConnections: true,
     connectionLimit: 10,

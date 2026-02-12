@@ -8,8 +8,15 @@ if (!isset($_SESSION['usuario_id'])) {
 $usuario_id = $_SESSION['usuario_id'];
 $nombre_completo = ($_SESSION['nombre'] ?? 'Usuario') . " " . ($_SESSION['apellido'] ?? '');
 
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db", 3306);
+$host = getenv('MYSQLHOST') ?: "127.0.0.1";
+$user = getenv('MYSQLUSER') ?: "root";
+$pass = getenv('MYSQLPASSWORD') ?: "";
+$db   = getenv('MYSQLDATABASE') ?: "nexus_db";
+$port = getenv('MYSQLPORT') ?: 3306;
+
+$conn = new mysqli($host, $user, $pass, $db, $port);
 if ($conn->connect_error) die("Error de conexión: " . $conn->connect_error);
+
 ?>
 
 <!DOCTYPE html>

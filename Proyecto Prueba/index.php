@@ -70,7 +70,7 @@
 
 
             <div class="Registrarse-input">
-                <input type="date" id="FechaN" name="FechaN" placeholder="Fecha de nacimiento" required> <br><br>
+                <input type="date" id="FechaN" name="FechaN" placeholder="Fecha de nacimiento" required>
                 <small class="error-msg" id="error-fecha" ></small>
             </div>
 

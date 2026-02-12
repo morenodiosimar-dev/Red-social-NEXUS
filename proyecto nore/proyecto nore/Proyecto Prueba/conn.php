@@ -4,11 +4,12 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$servername = "127.0.0.1";
-$username = "root";
-$password = "";
-$dbname = "nexus_db";
-$port = 3306;
+$servername = getenv('MYSQLHOST') ?: "127.0.0.1";
+$username = getenv('MYSQLUSER') ?: "root";
+$password = getenv('MYSQLPASSWORD') ?: "";
+$dbname = getenv('MYSQLDATABASE') ?: "nexus_db";
+$port = getenv('MYSQLPORT') ?: 3306;
+
 
 $conn = new mysqli($servername, $username, $password, $dbname, $port);
 

@@ -25,45 +25,97 @@ class ChatController extends Controller
     /**
      * Obtener datos del usuario actual (compatibilidad con sistema PHP)
      */
-    public function getCurrentUser()
+    /**
+     * Obtener datos del usuario actual
+     * Soporta sesión local (PHP nativo) y Autenticación Remota por Firma (HMAC)
+     */
+    public function getCurrentUser(Request $request)
     {
         try {
-            // Iniciar sesión si no está activa (compatibilidad con sistema existente)
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
+            $userId = null;
+            $source = 'guest';
+
+            // 1. Intentar Autenticación Remota (Prioridad para integración)
+            if ($request->filled(['user_id', 'signature'])) {
+                $remoteId = $request->input('user_id');
+                $timestamp = $request->input('timestamp', 0); // Opcional: para evitar replay attacks
+                $signature = $request->input('signature');
+
+                if ($this->verifySignature($remoteId, $signature, $timestamp)) {
+                    $userId = $remoteId;
+                    $source = 'remote_signature';
+                }
             }
 
-            // Verificar si el usuario está autenticado en el sistema PHP existente
-            if (isset($_SESSION['usuario_id']) && isset($_SESSION['nombre'])) {
-                $usuario = User::find($_SESSION['usuario_id']);
+            // 2. Si no hay remoto, intentar Sesión PHP Nativa (Legacy/Local)
+            if (!$userId) {
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
+                if (isset($_SESSION['usuario_id'])) {
+                    $userId = $_SESSION['usuario_id'];
+                    $source = 'native_session';
+                }
+            }
+
+            // 3. Procesar Usuario Encontrado
+            if ($userId) {
+                $usuario = User::find($userId);
 
                 if ($usuario) {
-                    // Marcar usuario como en línea
+                    // Login manual en Laravel para esta petición
+                    Auth::login($usuario);
+
+                    // Marcar leídos y online
                     $usuario->markAsOnline();
-                    broadcast(new UserOnline($usuario, true));
+
+                    // Solo emitir evento si es una conexión real de socket (opcional)
+                    // broadcast(new UserOnline($usuario, true));
 
                     return response()->json([
                         'success' => true,
                         'id_usuario' => $usuario->id,
                         'usuario' => $usuario->nombre_completo,
-                        'foto_perfil' => $usuario->foto_perfil ?: 'default.png'
+                        'foto_perfil' => $usuario->foto_perfil ?: 'default.png',
+                        'auth_source' => $source
                     ]);
                 }
             }
 
-            // Usuario no autenticado
+            // 4. Usuario no encontrado / Invitado
             return response()->json([
                 'success' => false,
                 'id_usuario' => null,
-                'usuario' => 'Invitado-' . rand(1000, 9999)
+                'usuario' => 'Invitado-' . rand(1000, 9999),
+                'error' => 'No session or valid signature found'
             ]);
 
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Chat Auth Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'error' => 'Error obteniendo datos del usuario: ' . $e->getMessage()
+                'error' => 'Error interno: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Verifica la firma HMAC enviada por Proyecto_Prueba
+     */
+    private function verifySignature($userId, $signature, $timestamp = 0)
+    {
+        // Secreto compartido - DEBE coincidir con el de Proyecto_Prueba
+        // Por defecto usamos APP_KEY para simplificar, pero idealmente sería una variable dedicada
+        $secret = config('app.key');
+
+        // El payload esperado debe coincidir con el generado en el otro lado
+        // Formato simple: user_id
+        // Formato seguro: user_id.timestamp
+        $payload = $timestamp ? "{$userId}.{$timestamp}" : (string) $userId;
+
+        $expected = hash_hmac('sha256', $payload, $secret);
+
+        return hash_equals($expected, $signature);
     }
 
     public function sendMessage(Request $request)

@@ -15,9 +15,10 @@ if (isset($_SESSION['usuario_id'])) {
     $chatHelper->printInitScript($_SESSION['usuario_id']);
 }
 // --- FIN INTEGRACIÓN CHAT ---
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db", 3306);
+require_once __DIR__ . '/conn.php';
+// $conn ya está inicializada en conn.php, no es necesario recrearla
 if ($conn->connect_error) {
-    die("Error de conexión");
+    die("Error de conexión: " . $conn->connect_error);
 }
 
 $nombre_completo = ($_SESSION['nombre'] ?? 'Usuario') . " " . ($_SESSION['apellido'] ?? '');

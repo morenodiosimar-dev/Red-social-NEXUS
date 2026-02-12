@@ -11,13 +11,13 @@ if (session_status() === PHP_SESSION_NONE) {
 include 'conn.php';
 
 // CAPTURAR DATOS 
-$nombre     = $_POST['nombre'] ?? '';
-$apellido   = $_POST['apellido'] ?? '';
-$fechaN     = $_POST['FechaN'] ?? '';
-$sexo       = $_POST['sexo'] ?? '';
-$correo     = $_POST['correo'] ?? '';
-$telefono   = $_POST['telefono'] ?? '';
-$contrasena = $_POST['contrasena'] ?? ''; 
+$nombre = $_POST['nombre'] ?? '';
+$apellido = $_POST['apellido'] ?? '';
+$fechaN = $_POST['FechaN'] ?? '';
+$sexo = $_POST['sexo'] ?? '';
+$correo = $_POST['correo'] ?? '';
+$telefono = $_POST['telefono'] ?? '';
+$contrasena = $_POST['contrasena'] ?? '';
 
 // VALIDACIONES BÁSICAS
 if (empty($nombre) || empty($correo) || empty($contrasena)) {
@@ -30,7 +30,7 @@ if (!empty($fechaN)) {
     $fechaNacimiento = new DateTime($fechaN);
     $hoy = new DateTime();
     $edad = $hoy->diff($fechaNacimiento)->y;
-    
+
     if ($edad < 12) {
         echo "Error: Debes tener al menos 12 años para registrarte.";
         exit;
@@ -61,18 +61,18 @@ $stmt->bind_param("sssssss", $nombre, $apellido, $fechaN, $sexo, $correo, $telef
 
 if ($stmt->execute()) {
     $user_id = $conn->insert_id;
-    
+
     // Debug: verificar el ID
     error_log("Registro exitoso - ID generado: " . $user_id);
-    
+
     // Guardar datos en sesión para que el usuario quede logueado
     $_SESSION['usuario_id'] = $user_id;
     $_SESSION['nombre'] = $nombre;
     $_SESSION['apellido'] = $apellido;
     $_SESSION['correo'] = $correo;
-    
+
     error_log("Sesión iniciada para usuario ID: " . $user_id);
-    
+
     // Redirigir directamente a seleccionar_interes.php
     header("Location: seleccionar_interes.php?user_id=" . $user_id);
     exit();

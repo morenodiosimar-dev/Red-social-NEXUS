@@ -7,6 +7,8 @@ const mysql = require("mysql2");
 const path = require("path");
 const PORT = process.env.PORT || 3000;
 
+console.log(`🚀 Intentando iniciar en puerto: ${PORT}`);
+
 // ===============================
 // CONFIGURACIÓN DE SOCKET.IO
 // ===============================
@@ -275,8 +277,10 @@ io.on("connection", (socket) => {
 // INICIAR SERVIDOR
 // ===============================
 http.listen(PORT, "0.0.0.0", () => {
-    console.log(`✅ Servidor NEXUS activo en el puerto ${PORT}`);
-    console.log(`🔗 URL de salud: http://0.0.0.0:${PORT}/health`);
+    console.log("------------------------------------------");
+    console.log(`✅ Servidor NEXUS ONLINE en puerto ${PORT}`);
+    console.log(`📡 Escuchando en 0.0.0.0 (Requerido por Railway)`);
+    console.log("------------------------------------------");
 });
 
 process.on("uncaughtException", err => console.error("🔥 Uncaught Exception:", err));

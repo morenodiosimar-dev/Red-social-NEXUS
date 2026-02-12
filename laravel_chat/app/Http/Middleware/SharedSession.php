@@ -26,18 +26,20 @@ class SharedSession
         if (isset($_SESSION['usuario_id']) && isset($_SESSION['nombre'])) {
             // Obtener usuario del modelo Laravel
             $user = User::find($_SESSION['usuario_id']);
-            
+
             if ($user) {
                 // Establecer usuario actual en Laravel
                 auth()->login($user);
-                
+
                 // Actualizar datos de sesión si es necesario
-                if ($_SESSION['nombre'] !== $user->nombre || 
-                    ($_SESSION['apellido'] ?? '') !== ($user->apellido ?? '')) {
+                if (
+                    $_SESSION['nombre'] !== $user->nombre ||
+                    ($_SESSION['apellido'] ?? '') !== ($user->apellido ?? '')
+                ) {
                     $_SESSION['nombre'] = $user->nombre;
                     $_SESSION['apellido'] = $user->apellido;
                 }
-                
+
                 // Marcar hora de última actividad
                 $_SESSION['ultima_actividad'] = now()->timestamp;
             }
@@ -47,12 +49,12 @@ class SharedSession
         if (isset($_SESSION['ultima_actividad'])) {
             $inactividad = now()->timestamp - $_SESSION['ultima_actividad'];
             $tiempoMaximoInactividad = config('session.lifetime', 120) * 60; // minutos a segundos
-            
+
             if ($inactividad > $tiempoMaximoInactividad) {
                 // Destruir sesión expirada
                 session_destroy();
                 auth()->logout();
-                
+
                 if ($request->expectsJson()) {
                     return response()->json(['error' => 'Sesión expirada'], 401);
                 } else {
@@ -72,17 +74,17 @@ class SharedSession
         // Asegurar que las cabeceras de sesión se envíen correctamente
         if (!headers_sent()) {
             // Configurar SameSite para compatibilidad con iframes si es necesario
-            $sameSite = config('session.same_site', 'lax');
-            $secure = config('session.secure', true);
-            
-            session_set_cookie_params([
-                'lifetime' => config('session.lifetime', 120) * 60,
-                'path' => config('session.path', '/'),
-                'domain' => config('session.domain', ''),
-                'secure' => $secure,
-                'httponly' => config('session.http_only', true),
-                'samesite' => $sameSite
-            ]);
+            // $sameSite = config('session.same_site', 'lax');
+            // $secure = config('session.secure', true);
+
+            // session_set_cookie_params([
+            //     'lifetime' => config('session.lifetime', 120) * 60,
+            //     'path' => config('session.path', '/'),
+            //     'domain' => config('session.domain', ''),
+            //     'secure' => $secure,
+            //     'httponly' => config('session.http_only', true),
+            //     'samesite' => $sameSite
+            // ]);
         }
 
         return $response;

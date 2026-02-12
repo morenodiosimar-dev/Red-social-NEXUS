@@ -20,6 +20,16 @@ if ($conn->connect_error) { die("Error de conexión"); }
 $nombre_completo = ($_SESSION['nombre'] ?? 'Usuario') . " " . ($_SESSION['apellido'] ?? '');
 $usuario_id = $_SESSION['usuario_id'];
 
+
+// --- INICIO INTEGRACIÓN CHAT ---
+require_once __DIR__ . '/INTEGRATION_HELPER.php';
+// REEMPLAZA CON TU APP_KEY DE RAILWAY (La que empieza con base64:...)
+$chatHelper = new ChatIntegration(
+    'base64:ldevSFYVK4zAsSkDyuRIW98rVJ1hdWfnyGVF68HqinA=',
+    'https://soothing-flexibility-production.up.railway.app'
+);
+
+
 // Verificar si el usuario tiene intereses guardados (solo para nuevos usuarios)
 $checkUserInterests = $conn->prepare("SELECT COUNT(*) as count FROM user_interests WHERE user_id = ?");
 $checkUserInterests->bind_param("i", $usuario_id);
@@ -775,9 +785,17 @@ body { background-color: #e9ecef !important; }
         <ion-icon name="search-outline"></ion-icon>
     </div>
     
-    <div class="icont" onclick="window.location.href='soothing-flexibility-production.up.railway.app">
-        <ion-icon name="chatbubble-outline"></ion-icon>
-    </div>
+    <div class="icont" onclick="
+                if(window.NexusChatConfig) {
+                    const { user_id, signature, endpoint } = window.NexusChatConfig;
+                    window.location.href = `${endpoint}?uid=${user_id}&sig=${signature}`;
+                } else {
+                    window.location.href='https://soothing-flexibility-production.up.railway.app';
+                }
+            ">
+                <ion-icon name="chatbubble-outline"></ion-icon>
+            </div>
+
     
     <div class="icont" onclick="window.location.href='Perfil.php'">
         <ion-icon name="person-outline"></ion-icon>

@@ -1,7 +1,8 @@
 <?php
 session_start();
 header('Content-Type: application/json');
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db", 3306);
+require_once __DIR__ . '/conn.php';
+// $conn inicializada en conn.php
 
 $usuario_id = $_SESSION['usuario_id'];
 $post_id = $_POST['post_id'];
@@ -33,13 +34,13 @@ if ($accion == 'comentar') {
     $contenido = $_POST['contenido'];
     $stmt = $conn->prepare("INSERT INTO comentarios (publicacion_id, usuario_id, contenido) VALUES (?, ?, ?)");
     $stmt->bind_param("iis", $post_id, $usuario_id, $contenido);
-    
+
     if ($stmt->execute()) {
         // CAPTURAR EL ID RECIÉN GENERADO
-        $nuevo_id = $stmt->insert_id; 
-        
+        $nuevo_id = $stmt->insert_id;
+
         $nombre_usuario = $_SESSION['nombre'] ?? 'Usuario';
-        
+
         // Notificación al dueño del post
         $res_owner = $conn->query("SELECT usuario_id FROM publicaciones WHERE id = $post_id");
         $owner = $res_owner->fetch_assoc();

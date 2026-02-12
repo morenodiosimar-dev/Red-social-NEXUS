@@ -1,7 +1,8 @@
 <?php
 session_start();
 header('Content-Type: application/json');
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db", 3306);
+require_once __DIR__ . '/conn.php';
+// $conn inicializada en conn.php
 
 $usuario_id = $_SESSION['usuario_id'] ?? null;
 $post_id = $_POST['post_id'] ?? null;
@@ -13,7 +14,7 @@ if (!$usuario_id || !$post_id) {
 
 // Verificar si ya lo republicaste para no duplicar
 $check = $conn->query("SELECT id FROM republicaciones WHERE usuario_id = $usuario_id AND publicacion_id = $post_id");
-if($check->num_rows > 0) {
+if ($check->num_rows > 0) {
     echo json_encode(["success" => false, "error" => "Ya has compartido esta publicación"]);
     exit;
 }

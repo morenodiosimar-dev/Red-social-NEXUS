@@ -2,7 +2,8 @@
 session_start();
 header('Content-Type: application/json');
 // Conexión usando tus datos
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db", 3306);
+require_once __DIR__ . '/conn.php';
+// $conn inicializada en conn.php
 $usuario_id = $_SESSION['usuario_id'];
 
 // Si el JS envía "?leer=1", marcamos como leídas
@@ -21,8 +22,9 @@ $res = $conn->query($query);
 $notis = [];
 $nuevas = 0;
 
-while($row = $res->fetch_assoc()) {
-    if ($row['leido'] == 0) $nuevas++;
+while ($row = $res->fetch_assoc()) {
+    if ($row['leido'] == 0)
+        $nuevas++;
     $notis[] = $row;
 }
 

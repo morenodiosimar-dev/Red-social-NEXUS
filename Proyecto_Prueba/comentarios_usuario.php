@@ -1,17 +1,19 @@
 <?php
 session_start();
 header('Content-Type: application/json; charset=utf-8');
-date_default_timezone_set('America/Caracas'); 
+date_default_timezone_set('America/Caracas');
 
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 try {
-    $conn = new mysqli("127.0.0.1", "root", "", "nexus_db",3306);
-    if($conn->connect_error) throw new Exception("Error de conexión");
+    require_once __DIR__ . '/conn.php';
+    if (!$conn)
+        throw new Exception("Error de conexión");
 
     $usuario_id = $_SESSION['usuario_id'] ?? 0;
-    if ($usuario_id == 0) throw new Exception("Sesión no iniciada");
+    if ($usuario_id == 0)
+        throw new Exception("Sesión no iniciada");
 
     $tipo = $_GET['tipo'] ?? 'mis';
     $inicio = $_GET['inicio'] ?? '';
@@ -35,7 +37,7 @@ try {
                 WHERE p.usuario_id = $usuario_id";
     }
 
-    if(!empty($inicio) && !empty($fin)) {
+    if (!empty($inicio) && !empty($fin)) {
         $sql .= " AND c.fecha BETWEEN '$inicio 00:00:00' AND '$fin 23:59:59'";
     }
 
@@ -43,8 +45,8 @@ try {
     $res = $conn->query($sql);
 
     $data = [];
-    if($res) {
-        while($row = $res->fetch_assoc()) {
+    if ($res) {
+        while ($row = $res->fetch_assoc()) {
             $data[] = $row;
         }
     }

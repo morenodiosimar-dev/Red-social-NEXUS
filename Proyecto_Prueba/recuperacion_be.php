@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json');
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db", 3306);
+require_once __DIR__ . '/conn.php';
+// $conn inicializada en conn.php
 
 $accion = $_POST['accion'] ?? '';
 $correo = $_POST['correo'] ?? '';
@@ -16,7 +17,7 @@ if ($accion == 'verificar_correo') {
         $usuario = $result->fetch_assoc();
         // Devolvemos el nombre en la respuesta JSON
         echo json_encode([
-            "success" => true, 
+            "success" => true,
             "nombre" => $usuario['nombre']
         ]);
     } else {

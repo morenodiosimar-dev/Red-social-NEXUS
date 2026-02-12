@@ -1,7 +1,8 @@
 <?php
 session_start();
 header('Content-Type: application/json');
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db", 3306);
+require_once __DIR__ . '/conn.php';
+// $conn inicializada en conn.php
 
 if ($conn->connect_error || !isset($_SESSION['usuario_id'])) {
     echo json_encode(["success" => false, "error" => "No autorizado"]);

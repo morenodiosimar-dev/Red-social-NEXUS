@@ -6,20 +6,21 @@ ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 try {
-    $conn = new mysqli("127.0.0.1", "root", "", "nexus_db",3306);
-    
-    if($conn->connect_error) {
+    require_once __DIR__ . '/conn.php';
+    // $conn inicializada en conn.php
+
+    if ($conn->connect_error) {
         throw new Exception("Error de base de datos.");
     }
 
     // Asegúrate de usar el ID real de la sesión cuando termines las pruebas
-    $usuario_id = $_SESSION['usuario_id'] ?? 9; 
+    $usuario_id = $_SESSION['usuario_id'] ?? 9;
 
     $tipo = $_GET['tipo'] ?? 'mis';
     $inicio = $_GET['inicio'] ?? '';
     $fin = $_GET['fin'] ?? '';
 
-    if($tipo === 'mis'){
+    if ($tipo === 'mis') {
         $sql = "SELECT r.*, p.caption AS publicacion, p.ruta_archivo, 
                        u.nombre AS nombre_objetivo, u.apellido AS apellido_objetivo
                 FROM reacciones r
@@ -37,20 +38,20 @@ try {
 
     // --- CORRECCIÓN DE FECHAS ---
     // Usamos DATE(r.fecha) para comparar solo el día, ignorando la hora exacta.
-    if(!empty($inicio)) {
+    if (!empty($inicio)) {
         $sql .= " AND DATE(r.fecha) >= '$inicio'";
     }
-    if(!empty($fin)) {
+    if (!empty($fin)) {
         $sql .= " AND DATE(r.fecha) <= '$fin'";
     }
 
     $sql .= " ORDER BY r.fecha DESC";
 
     $res = $conn->query($sql);
-    
+
     $reacciones = [];
-    if($res) {
-        while($row = $res->fetch_assoc()) {
+    if ($res) {
+        while ($row = $res->fetch_assoc()) {
             $reacciones[] = $row;
         }
     }

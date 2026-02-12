@@ -2,7 +2,8 @@
 session_start();
 header('Content-Type: application/json');
 
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db", 3306);
+require_once __DIR__ . '/conn.php';
+// $conn inicializada en conn.php
 
 if (!isset($_SESSION['usuario_id'])) {
     echo json_encode(["success" => false, "error" => "Sesión no iniciada"]);
@@ -30,8 +31,8 @@ if ($tipo_perfil === 'contenido') {
 }
 
 // Crear carpeta si no existe
-if (!file_exists('uploads')) { 
-    mkdir('uploads', 0777, true); 
+if (!file_exists('uploads')) {
+    mkdir('uploads', 0777, true);
 }
 
 $nombreArchivo = time() . "_" . basename($archivo['name']);
@@ -41,18 +42,18 @@ if (move_uploaded_file($archivo['tmp_name'], $rutaDestino)) {
     $stmt = $conn->prepare("INSERT INTO publicaciones (usuario_id, tipo_perfil, caption, ruta_archivo, tipo_archivo, interes_id) VALUES (?, ?, ?, ?, ?, ?)");
     $tipo_mime = $archivo['type'];
     $interes_id_final = ($tipo_perfil === 'contenido') ? $_POST['interes_id'] : null;
-    
+
     $stmt->bind_param("issssi", $usuario_id, $tipo_perfil, $caption, $rutaDestino, $tipo_mime, $interes_id_final);
-    
+
     if ($stmt->execute()) {
         echo json_encode([
-            "success" => true, 
+            "success" => true,
             "ruta" => $rutaDestino,
             "message" => "Publicación guardada correctamente"
         ]);
     } else {
         echo json_encode([
-            "success" => false, 
+            "success" => false,
             "error" => "Error al guardar en base de datos: " . $conn->error,
             "debug" => [
                 "usuario_id" => $usuario_id,
@@ -65,7 +66,7 @@ if (move_uploaded_file($archivo['tmp_name'], $rutaDestino)) {
     $stmt->close();
 } else {
     echo json_encode([
-        "success" => false, 
+        "success" => false,
         "error" => "Error al subir el archivo",
         "debug" => [
             "upload_error" => $archivo['error'] ?? 'unknown',

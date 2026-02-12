@@ -1,6 +1,7 @@
 <?php
 session_start();
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db",3306);
+require_once __DIR__ . '/conn.php';
+// $conn inicializada en conn.php
 
 $usuario_id = $_SESSION['usuario_id']; // quien da click
 $seguido_id = $_POST['seguido_id'];    // quien recibe el follow
@@ -11,7 +12,7 @@ $stmt_check->bind_param("ii", $usuario_id, $seguido_id);
 $stmt_check->execute();
 $ya_sigue = $stmt_check->get_result()->num_rows > 0;
 
-if($ya_sigue){
+if ($ya_sigue) {
     $stmt_del = $conn->prepare("DELETE FROM seguidores WHERE seguidor_id = ? AND seguido_id = ?");
     $stmt_del->bind_param("ii", $usuario_id, $seguido_id);
     $stmt_del->execute();

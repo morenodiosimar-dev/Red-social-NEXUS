@@ -3,7 +3,8 @@ session_start();
 header('Content-Type: application/json; charset=utf-8');
 
 // 1. Conexión a la base de datos
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db",3306);
+require_once __DIR__ . '/conn.php';
+// $conn inicializada en conn.php
 
 if ($conn->connect_error) {
     echo json_encode(["status" => "error", "message" => "Error de conexión"]);
@@ -30,7 +31,7 @@ $patron = "/^[a-zA-ZÀ-ÿ]+$/u";
 
 if (!preg_match($patron, $nom) || !preg_match($patron, $ape)) {
     echo json_encode([
-        "status" => "error", 
+        "status" => "error",
         "message" => "El nombre y apellido solo deben contener letras, sin espacios, números ni símbolos."
     ]);
     exit;

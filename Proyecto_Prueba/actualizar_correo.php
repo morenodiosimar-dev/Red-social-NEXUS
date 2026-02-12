@@ -24,7 +24,8 @@ if (!preg_match('/^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com)$/', $correo)) {
     exit;
 }
 
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db", 3306);
+require_once __DIR__ . '/conn.php';
+// $conn inicializada en conn.php
 if ($conn->connect_error) {
     echo json_encode(["status" => "error", "message" => "Error de conexión"]);
     exit;

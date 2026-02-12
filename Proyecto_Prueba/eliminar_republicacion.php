@@ -1,7 +1,8 @@
 <?php
 session_start();
 header('Content-Type: application/json');
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db", 3306);
+require_once __DIR__ . '/conn.php';
+// $conn inicializada en conn.php
 
 $usuario_id = $_SESSION['usuario_id'] ?? null;
 $repost_id = $_POST['id'] ?? null; // ID de la tabla republicaciones

@@ -2,7 +2,8 @@
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 
-$conn = new mysqli("127.0.0.1", "root", "", "nexus_db",3306);
+require_once __DIR__ . '/conn.php';
+// $conn inicializada en conn.php
 $u_id = $_SESSION['usuario_id'] ?? 0;
 
 // Recibimos 'personal' o 'contenido' (en minúsculas como en tu perfil.php)

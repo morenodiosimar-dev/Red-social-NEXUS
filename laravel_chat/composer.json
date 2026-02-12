@@ -3,7 +3,7 @@
     "description": "Sistema de chat migrado de Node.js a Laravel",
     "type": "project",
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "laravel/framework": "^10.0",
         "pusher/pusher-php-server": "^7.0",
         "laravel/websockets": "^2.0"

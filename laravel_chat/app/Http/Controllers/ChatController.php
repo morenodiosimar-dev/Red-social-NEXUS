@@ -205,12 +205,17 @@ class ChatController extends Controller
 
     private function getCurrentUserId()
     {
-        // Intentar obtener desde sesión (compatible con sistema PHP existente)
+        // 1. Prioridad: Autenticación de Laravel (Token/Session)
+        if (Auth::check()) {
+            return Auth::id();
+        }
+
+        // 2. Fallback: Sesión PHP nativa (Solo para entornos locales compartidos)
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
-        return $_SESSION['id_usuario'] ?? null;
+        return $_SESSION['usuario_id'] ?? null; // Corregido: usuario_id es la key usada en Proyecto_Prueba
     }
 
     public function logout()

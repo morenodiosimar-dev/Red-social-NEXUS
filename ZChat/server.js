@@ -291,5 +291,17 @@ io.on("connection", (socket) => {
 
 // El inicio del servidor se movió arriba para evitar error 502 en Railway
 
-process.on("uncaughtException", err => console.error("🔥 Uncaught Exception:", err));
-process.on("unhandledRejection", err => console.error("🔥 Unhandled Rejection:", err));
+// ===============================
+// BLINDAJE CONTRA CRASHES (Evita el 502)
+// ===============================
+process.on("uncaughtException", (err) => {
+    console.log("------------------------------------------");
+    console.error("🔥 ERROR CRÍTICO (No detenido):", err.message);
+    console.log("------------------------------------------");
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+    console.log("------------------------------------------");
+    console.error("🔥 PROMESA RECHAZADA (No detenida):", reason);
+    console.log("------------------------------------------");
+});

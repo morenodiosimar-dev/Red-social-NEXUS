@@ -410,7 +410,7 @@ async function mandarRepublicacion(id) {
 
         if (resultado.success) {
             alert("✅ ¡Republicado con éxito!");
-            window.location.href = "perfil.php"; // Te manda directo a ver tu logro
+            window.location.href = "Perfil.php"; // Te manda directo a ver tu logro
         } else {
             alert("❌ Error: " + resultado.error);
         }

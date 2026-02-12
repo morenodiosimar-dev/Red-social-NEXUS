@@ -779,7 +779,7 @@ body { background-color: #e9ecef !important; }
         <ion-icon name="chatbubble-outline"></ion-icon>
     </div>
     
-    <div class="icont" onclick="window.location.href='perfil.php'">
+    <div class="icont" onclick="window.location.href='Perfil.php'">
         <ion-icon name="person-outline"></ion-icon>
     </div>
 </div>

@@ -19,7 +19,7 @@ $usuario_id = $_SESSION['usuario_id']; // quien visita
 $id_perfil = $_GET['id'] ?? null;      // perfil visitado
 
 if (!$id_perfil || $id_perfil == $usuario_id) {
-    header("Location: perfil.php"); // redirige a tu propio perfil
+    header("Location: Perfil.php"); // redirige a tu propio perfil
     exit;
 }
 
@@ -146,7 +146,7 @@ $res_reposts = $conn->query($query_reposts);
                 <?php echo $ya_sigue ? 'Siguiendo' : 'Seguir'; ?>
             </button>
             <button class="bg-gray-200 text-black px-4 py-1 rounded-full text-xs font-bold"
-                onclick="window.location.href='http://localhost:3000?contacto=<?php echo urlencode($nombre_visitado); ?>'">
+                onclick="window.location.href='https://red-social-nexus-production.up.railway.app/?contacto=<?php echo urlencode($nombre_visitado); ?>'">
                 Mensaje
             </button>
         </div>
@@ -233,8 +233,8 @@ $res_reposts = $conn->query($query_reposts);
     <div class="iconos-inferiores fixed bottom-0 w-full bg-white border-t p-3 flex justify-around">
         <ion-icon name="home-outline" class="icon-gradient text-2xl" onclick="window.location.href='cuenta.php'"></ion-icon>
         <ion-icon name="search-outline" class="icon-gradient text-2xl" onclick="window.location.href='busqueda.php'"></ion-icon>
-        <ion-icon name="chatbubble-outline" class="icon-gradient text-2xl" onclick="window.location.href='http://localhost:3000'"></ion-icon>
-        <ion-icon name="person-outline" class="icon-gradient text-2xl" onclick="window.location.href='perfil.php'"></ion-icon>
+        <ion-icon name="chatbubble-outline" class="icon-gradient text-2xl" onclick="window.location.href='https://red-social-nexus-production.up.railway.app/'"></ion-icon>
+        <ion-icon name="person-outline" class="icon-gradient text-2xl" onclick="window.location.href='Perfil.php'"></ion-icon>
     </div>
 </div>
 

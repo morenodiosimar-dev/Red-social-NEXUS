@@ -11,6 +11,10 @@ $port = 3306;
 
 $conn = new mysqli($servername, $username, $password, $dbname, $port);
 
+if ($conn->connect_error) {
+    die("Error de conexión: " . $conn->connect_error);
+}
+
 // 2. Seguridad
 if (!isset($_SESSION['usuario_id'])) {
     header("Location: index.php");
@@ -104,8 +108,8 @@ $res_reposts = $conn->query("SELECT p.id, p.ruta_archivo, p.tipo_archivo, r.fech
             </div>
         </div>
     <div class="perfiles flex justify-around border-b">
-        <a href="perfil.php?tab=personal" class="perso p-2 <?php echo $tab == 'personal' ? 'active-tab' : ''; ?>">Personal</a>
-        <a href="perfil.php?tab=contenido" class="cont p-2 <?php echo $tab == 'contenido' ? 'active-tab' : ''; ?>">Contenido</a>
+        <a href="Perfil.php?tab=personal" class="perso p-2 <?php echo $tab == 'personal' ? 'active-tab' : ''; ?>">Personal</a>
+        <a href="Perfil.php?tab=contenido" class="cont p-2 <?php echo $tab == 'contenido' ? 'active-tab' : ''; ?>">Contenido</a>
     </div>
 
     <div class="mt-6">
@@ -176,8 +180,8 @@ $res_reposts = $conn->query("SELECT p.id, p.ruta_archivo, p.tipo_archivo, r.fech
     <div class="iconos-inferiores">
         <ion-icon name="home-outline" class="icon-gradient" onclick="window.location.href='cuenta.php'"></ion-icon>
         <ion-icon name="search-outline" class="icon-gradient" onclick="window.location.href='busqueda.php'"></ion-icon>
-        <ion-icon name="chatbubble-outline" class="icon-gradient" onclick="window.location.href='http://localhost:3000'"></ion-icon>
-        <ion-icon name="person-outline" class="icon-gradient active-icon" onclick="window.location.href='perfil.php'"></ion-icon>
+        <ion-icon name="chatbubble-outline" class="icon-gradient" onclick="window.location.href='https://red-social-nexus-production.up.railway.app/'"></ion-icon>
+        <ion-icon name="person-outline" class="icon-gradient active-icon" onclick="window.location.href='Perfil.php'"></ion-icon>
     </div>
 </div>
 

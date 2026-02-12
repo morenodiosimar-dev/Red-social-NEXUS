@@ -37,8 +37,8 @@ if (!isset($_SESSION['usuario_id'])) {
         <div class="iconos-inferiores">
             <ion-icon name="home-outline" onclick="window.location.href='cuenta.php'" class="icon-gradient"></ion-icon>
             <ion-icon name="search-outline" class="icon-gradient  active-icon"onclick="window.location.href='busqueda.php'" ></ion-icon>
-            <ion-icon name="chatbubble-outline" class="icon-gradient" onclick="window.location.href='http://localhost:3000'"></ion-icon>
-            <ion-icon name="person-outline" onclick="window.location.href='perfil.php'" class="icon-gradient"></ion-icon>
+            <ion-icon name="chatbubble-outline" class="icon-gradient" onclick="window.location.href='https://red-social-nexus-production.up.railway.app/'"></ion-icon>
+            <ion-icon name="person-outline" onclick="window.location.href='Perfil.php'" class="icon-gradient"></ion-icon>
         </div>
 <script src="scripts.js">
     </script>

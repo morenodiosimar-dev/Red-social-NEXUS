@@ -22,6 +22,17 @@ const io = require("socket.io")(http, {
 const usuariosOnline = {}; // Usuarios conectados
 
 // ===============================
+// INICIAR SERVIDOR INMEDIATAMENTE
+// ===============================
+// Esto evita el error 502 de Railway al responder rápido
+http.listen(PORT, "0.0.0.0", () => {
+    console.log("------------------------------------------");
+    console.log(`🚀 SERVIDOR ACTIVO EN PUERTO: ${PORT}`);
+    console.log(`📡 Escuchando en 0.0.0.0`);
+    console.log("------------------------------------------");
+});
+
+// ===============================
 // CONEXIÓN A LA BASE DE DATOS
 // ===============================
 console.log("🔍 DETALLE DE VARIABLES:");
@@ -278,15 +289,7 @@ io.on("connection", (socket) => {
     });
 });
 
-// ===============================
-// INICIAR SERVIDOR
-// ===============================
-http.listen(PORT, "0.0.0.0", () => {
-    console.log("------------------------------------------");
-    console.log(`✅ Servidor NEXUS ONLINE en puerto ${PORT}`);
-    console.log(`📡 Escuchando en 0.0.0.0 (Requerido por Railway)`);
-    console.log("------------------------------------------");
-});
+// El inicio del servidor se movió arriba para evitar error 502 en Railway
 
 process.on("uncaughtException", err => console.error("🔥 Uncaught Exception:", err));
 process.on("unhandledRejection", err => console.error("🔥 Unhandled Rejection:", err));

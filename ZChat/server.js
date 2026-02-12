@@ -24,11 +24,17 @@ const usuariosOnline = {}; // Usuarios conectados
 // ===============================
 // CONEXIÓN A LA BASE DE DATOS
 // ===============================
-console.log("🔍 Verificando variables de entorno MySQL:");
-console.log("MYSQLHOST:", process.env.MYSQLHOST ? "✅ Configurado" : "❌ NO configurado");
-console.log("MYSQLUSER:", process.env.MYSQLUSER ? "✅ Configurado" : "❌ NO configurado");
-console.log("MYSQLDATABASE:", (process.env.MYSQLDATABASE || 'railway') ? "✅ Configurado (o usando default 'railway')" : "❌ NO configurado");
-console.log("MYSQLPORT:", process.env.MYSQLPORT ? "✅ Configurado" : "❌ NO configurado");
+console.log("🔍 DETALLE DE VARIABLES:");
+const debugVar = (name, val) => {
+    if (!val) console.log(`${name}: ❌ NO EXISTE`);
+    else console.log(`${name}: ✅ CARGADA (Inicia con: "${val.substring(0, 1)}...", Longitud: ${val.length})`);
+};
+debugVar("MYSQLHOST", process.env.MYSQLHOST);
+debugVar("MYSQLUSER", process.env.MYSQLUSER);
+debugVar("MYSQLPASSWORD", process.env.MYSQLPASSWORD);
+debugVar("MYSQLDATABASE", process.env.MYSQLDATABASE);
+debugVar("MYSQLPORT", process.env.MYSQLPORT);
+console.log("------------------------------------------");
 
 const dbConfig = {
     host: process.env.MYSQLHOST,

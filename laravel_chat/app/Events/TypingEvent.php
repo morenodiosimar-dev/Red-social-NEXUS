@@ -48,7 +48,7 @@ class TypingEvent implements ShouldBroadcast
      */
     public function broadcastAs()
     {
-        return 'typing.event';
+        return 'TypingEvent';
     }
 
     /**
@@ -59,7 +59,10 @@ class TypingEvent implements ShouldBroadcast
         return [
             'sala' => $this->sala,
             'usuario' => $this->usuario,
-            'nombre_usuario' => $this->nombreUsuario,
+            'user' => [
+                'id' => $this->usuario,
+                'nombre' => $this->nombreUsuario
+            ],
             'is_typing' => $this->isTyping,
             'timestamp' => now()->toISOString()
         ];

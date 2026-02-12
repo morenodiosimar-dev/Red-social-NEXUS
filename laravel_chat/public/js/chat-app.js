@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
 
         // Escuchar mensajes globales o privados
-        window.Echo.private(`chat.${userId}`)
+        window.Echo.channel(`chat.${userId}`)
             .listen('NewMessage', (e) => {
                 if (currentChatId == e.message.from_id) {
                     appendMessage(e.message, false);

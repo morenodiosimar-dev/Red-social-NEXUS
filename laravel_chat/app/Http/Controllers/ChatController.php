@@ -74,6 +74,8 @@ class ChatController extends Controller
 
                     return response()->json([
                         'success' => true,
+                        'id' => $usuario->id,
+                        'user_id' => $usuario->id,
                         'id_usuario' => $usuario->id,
                         'usuario' => $usuario->nombre_completo,
                         'foto_perfil' => $usuario->foto_perfil ?: 'default.png',
@@ -117,31 +119,53 @@ class ChatController extends Controller
 
         return hash_equals($expected, $signature);
     }
-
     public function sendMessage(Request $request)
     {
+        $userId = $this->getCurrentUserId();
+        if (!$userId) {
+            return response()->json(['error' => 'No session'], 401);
+        }
+
         $request->validate([
-            'sala' => 'required|string',
-            'id_usuario' => 'required|integer',
-            'nombre_usuario' => 'required|string',
-            'mensaje' => 'required|string|max:1000'
+            'to_id' => 'required',
+            'message' => 'required|string|max:1000'
         ]);
 
         try {
+            $otherUserId = (int)$request->to_id;
+            // Generar identificador de sala único (menor-mayor)
+            $sala = $userId < $otherUserId ? "{$userId}-{$otherUserId}" : "{$otherUserId}-{$userId}";
+
+            // Obtener nombre de usuario para el evento
+            $user = User::find($userId);
+            $nombreUsuario = $user ? $user->nombre_completo : 'Usuario';
+
             // Guardar mensaje en la base de datos
-            $message = DB::table('mensajes')->insert([
-                'sala' => $request->sala,
-                'usuario' => $request->id_usuario,
-                'mensaje' => $request->mensaje,
+            DB::table('mensajes')->insert([
+                'sala' => $sala,
+                'usuario' => $userId,
+                'mensaje' => $request->message,
                 'fecha' => now()
             ]);
 
-            // Emitir evento via WebSocket (configurado después)
-            broadcast(new \App\Events\NewMessage($request->all()));
+            // Datos para el evento y respuesta
+            $messageData = [
+                'from_id' => $userId,
+                'to_id' => $otherUserId,
+                'body' => $request->message,
+                'sala' => $sala,
+                'id_usuario' => $userId,
+                'mensaje' => $request->message,
+                'nombre_usuario' => $nombreUsuario
+            ];
+
+            // Emitir evento via WebSocket
+            broadcast(new \App\Events\NewMessage($messageData));
 
             return response()->json(['success' => true, 'message' => 'Mensaje enviado']);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al enviar mensaje'], 500);
+            \Log::error('Chat Send Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Error al enviar mensaje: ' . $e->getMessage()], 500);
         }
     }
 
@@ -184,6 +208,8 @@ class ChatController extends Controller
             ->map(function ($usuario) {
                 return [
                     'id' => $usuario->id,
+                    'nombre' => $usuario->nombre,
+                    'apellido' => $usuario->apellido,
                     'nombre_completo' => trim($usuario->nombre . ' ' . $usuario->apellido),
                     'foto_perfil' => $usuario->foto_perfil ?: 'default.png'
                 ];
@@ -194,8 +220,16 @@ class ChatController extends Controller
 
     public function getMessages($sala)
     {
+        $userId = $this->getCurrentUserId();
+        
+        // Si $sala es un número, es un ID de usuario, debemos generar el nombre de la sala
+        if (is_numeric($sala)) {
+            $otherUserId = (int)$sala;
+            $sala = $userId < $otherUserId ? "{$userId}-{$otherUserId}" : "{$otherUserId}-{$userId}";
+        }
+
         $messages = DB::table('mensajes')
-            ->select('usuario as id_usuario', 'mensaje', 'fecha')
+            ->select('usuario as from_id', 'mensaje as body', 'fecha as created_at')
             ->where('sala', $sala)
             ->orderBy('fecha', 'ASC')
             ->get();
@@ -226,6 +260,29 @@ class ChatController extends Controller
 
         session_destroy();
         Auth::logout();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function sendTyping(Request $request)
+    {
+        $userId = $this->getCurrentUserId();
+        if (!$userId) return response()->json(['error' => 'No auth'], 401);
+
+        $request->validate([
+            'sala' => 'required',
+            'is_typing' => 'required|boolean'
+        ]);
+
+        $user = User::find($userId);
+        $nombreUsuario = $user ? $user->nombre_completo : 'Usuario';
+
+        broadcast(new \App\Events\TypingEvent(
+            $request->sala,
+            $userId,
+            $nombreUsuario,
+            $request->is_typing
+        ))->toOthers();
 
         return response()->json(['success' => true]);
     }

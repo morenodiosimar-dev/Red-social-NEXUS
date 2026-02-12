@@ -1,0 +1,286 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+:root {
+    --gradient: linear-gradient(45deg, #ff00cc, #3333ff);
+    --header-height: 80px; /* Altura aproximada del encabezado fijo */
+}
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter',sans-serif;
+}
+body {
+    padding-top: var(--header-height);
+    background-color: white;
+    min-height: 100vh;
+}
+.perfil{
+    width: 100%;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    align-items: center;
+    padding-bottom: 70px;
+    gap: 5px;
+}
+.perfil-usuario{
+    width: 100%;
+    max-width: 1500px;
+    margin-top: 0;
+    padding-top: 20px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin: 0 auto;
+    padding: 5px, 0; 
+
+}
+/* Animación para todos los iconos inferiores en ambas páginas */
+.icont, .icon-gradient {
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.icont:hover, .icon-gradient:hover {
+    transform: scale(1.2);
+}
+
+/* Clase para resaltar el icono de la página actual */
+.active-icon {
+    background: rgb(240, 226, 226) !important; /* Fondo blanco */
+    color: #b73aff !important;   /* Icono rosa/morado */
+    box-shadow: 0 0 15px rgba(183, 0, 255, 0.726);
+    transform: scale(1.1);
+}
+.superior {
+    background-color: white;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 100; /* Aumentamos de 20 a 100 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    height: var(--header-height); 
+}
+.nombre-red {
+    font-size: 2rem;
+    font-weight: bold;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stats {
+    display: flex;
+    gap: 15px;
+}
+
+.stat {
+    font-size: 15px;
+    font-weight: 600;
+}
+.perfiles{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    margin-bottom: 30px;
+    margin-top: 30px;
+    margin: 25;
+    padding-left:1rem;
+    padding-right: 1rem;
+}
+.perso{
+    font-size: 15px;
+    font-weight: 600;
+}
+.cont{
+    font-size: 15px;
+    font-weight: 600;
+}
+.icon-menu {
+    background: linear-gradient(45deg, #ff00cc, #3333ff);
+    border-radius: 25px;
+    padding: 15px 15px;
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    display: flex;
+    justify-content: left;
+    font-size: 30px;
+    color: white;
+}
+.perfil-info {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    margin-bottom: 30px;
+    margin-top: 10px;
+    gap: 8px;
+    margin: 0;
+    padding-left:1rem;
+    padding-right: 1rem;
+    
+}
+.foto-perfil {
+    background-color: #eaeaea;
+    font-size: 45px;
+    padding: 10px;
+    border-radius: 50%;
+}
+.user-name {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.texto-principal {
+    display: flex; 
+    flex-direction: column; 
+    align-items: flex-start; 
+}
+
+.iconos-inferiores {
+    width: 100%;
+    height: 70px; 
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: white;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    padding: 10px 20px;
+    z-index: 100;
+}
+
+.icon-gradient {
+    background: var(--gradient);
+    border-radius: 50%; 
+    padding: 15px; 
+    font-size: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s;
+
+}
+.icon-gradient:hover {
+    transform: scale(1.1); 
+}
+
+
+#modal-detalle:not(.hidden) {
+    display: flex !important;
+}
+        .grid-publicaciones {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            padding: 10px;
+        }
+        .post-item {
+            aspect-ratio: 1 / 1;
+            background: #eee;
+            overflow: hidden;
+        }
+        .post-item img, .post-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .active-tab {
+            border-bottom: 3px solid #b702ff;
+            font-weight: bold;
+            color: #b702ff;
+        }
+
+/* Impedir scroll horizontal en todo el sitio */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Corregir el modal para que no flote */
+#modal-detalle {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Contenedor de fotos para que las flechas no se salgan */
+.contenedor-carrusel {
+    position: relative;
+    width: 100%;
+    max-width: 100vw; /* No permite que sea más ancho que la pantalla */
+    overflow: hidden; /* Corta lo que se salga */
+}
+
+/* Las flechas ahora se limitan a su padre */
+.btn-flecha {
+    z-index: 50 !important;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    padding: 5px;
+}
+
+.flecha-izq { left: 10px; }
+.flecha-der { right: 10px; }
+
+/* Asegura que el contenedor de las fotos no deje salir nada */
+.relative.group {
+    position: relative;
+    width: 100%;
+    max-width: 100vw;
+    overflow: hidden; /* Esto es vital para que no se vea sobre Nexus */
+}
+
+/* 1. El Header (Nexus) debe ser el REY de la pantalla */
+.centro, header {
+    position: sticky !important;
+    top: 0;
+    z-index: 9999 !important; /* El valor más alto */
+    background-color: white; /* Importante para que no sea transparente */
+}
+
+/* 2. El contenedor de las fotos debe ser una "zona contenida" */
+.relative.group {
+    position: relative;
+    z-index: 10; /* Mucho menor que el de Nexus */
+}
+/* 2. Ajusta las flechas para que estén por debajo de 100 */
+button[onclick^="window.deslizarCarrusel"] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 45px;
+    height: 45px;
+    padding: 0;
+    z-index: 50; /* Debe ser menor que el z-index de .superior */
+}
+#carrusel-fotos {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth; /* Esto hace que la animación de la flecha se vea bien */
+    -ms-overflow-style: none;  /* Ocultar en IE */
+    scrollbar-width: none;     /* Ocultar en Firefox */
+}
+
+#carrusel-fotos::-webkit-scrollbar {
+    display: none; /* Ocultar en Chrome y Safari (lo que ves rojo) */
+}

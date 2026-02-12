@@ -1,0 +1,25 @@
+# Nixpacks configuration for Laravel Chat deployment
+
+[phases.setup]
+# Install required system packages
+nixPkgs = ["php82", "php82Extensions.pdo", "php82Extensions.pdo_mysql", "php82Extensions.mbstring", "php82Extensions.xml", "php82Extensions.curl"]
+
+[phases.install]
+# Change to Laravel directory and install dependencies
+cmds = [
+  "cd laravel_chat",
+  "composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader"
+]
+
+[phases.build]
+# Laravel optimization commands
+cmds = [
+  "cd laravel_chat",
+  "php artisan config:cache",
+  "php artisan route:cache",
+  "php artisan view:cache"
+]
+
+[start]
+# Start the application
+cmd = "cd laravel_chat && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"

@@ -28,20 +28,12 @@ Route::get('/chat/online', [ChatController::class, 'getOnlineUsers'])->name('cha
 Route::post('/chat/logout', [ChatController::class, 'logout'])->name('chat.logout');
 
 // Ruta para servir el frontend del chat (compatibilidad con sistema existente)
-Route::get('/chat/frontend', function() {
+Route::get('/chat/frontend', function () {
     return view('chat.index');
 });
 
 // Ruta de bienvenida por defecto
+// Ruta de bienvenida por defecto - Redirigir al chat o mostrar interfaz
 Route::get('/', function () {
-    return response()->json([
-        'message' => 'Nexus Chat API - Laravel',
-        'status' => 'online',
-        'version' => '1.0.0',
-        'endpoints' => [
-            'chat' => '/chat',
-            'api' => '/api/chat/*',
-            'websocket' => 'Laravel Echo + Pusher'
-        ]
-    ]);
+    return redirect('/chat');
 });

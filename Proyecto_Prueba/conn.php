@@ -19,9 +19,22 @@ if (getenv("MYSQLHOST")) {
     $port = getenv("MYSQLPORT");
 }
 
+// Validación: Si estamos en producción (no localhost) y no hay credenciales, detener.
+// Asumimos producción si existe alguna variable de entorno típica o si DB_HOST no es localhost
+$is_production = getenv("RAILWAY_ENVIRONMENT") || getenv("RAILWAY_STATIC_URL") || (getenv("DB_HOST") && getenv("DB_HOST") !== "127.0.0.1");
+
+if ($is_production && empty($password) && empty($username)) {
+    // Fail fast 500 error en lugar de timeout 502
+    http_response_code(500);
+    die("Error de Configuración: Variables de entorno de base de datos no detectadas. Por favor configure MYSQLHOST, MYSQLUSER, MYSQLPASSWORD, MYSQLDATABASE en Railway.");
+}
+
 $conn = new mysqli($servername, $username, $password, $dbname, $port);
 
 if ($conn->connect_errno) {
-    die("Error en la conexión a MySQL: " . $conn->connect_error);
+    http_response_code(500);
+    // En producción no mostrar detalles sensibles, solo error genérico o loguearlo
+    error_log("MySQL Connection Error: " . $conn->connect_error);
+    die("Error de conexión a la base de datos (Ver logs)");
 }
 ?>
